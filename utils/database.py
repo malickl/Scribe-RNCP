@@ -32,7 +32,7 @@ def get_or_create_user(email, nom):
     return id_user
 
 
-def verifier_consentement(id_user):
+def check_consent(id_user):
     conn = get_connection()
     cur = conn.cursor()
 

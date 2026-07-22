@@ -2,8 +2,10 @@
 Lot 1 : Identité & agenda
 OAuth Google, connexion, gestion des utilisateurs.
 """
-from flask import Blueprint, redirect, session
+from flask import Blueprint, request, session, redirect, url_for
 from google_auth_oauthlib.flow import Flow
+from googleapiclient.discovery import build
+from utils.database import get_or_create_user
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -27,6 +29,28 @@ def login():
     flow_store[state] = flow
     return redirect(auth_url)
 
-# @auth_bp.route("/callback")
-# def callback():
-#     ...
+
+
+@auth_bp.route("/callback")
+def callback():
+    state = request.args.get('state')
+    flow = flow_store[state]
+    flow.fetch_token(authorization_response=request.url)
+    creds = flow.credentials
+
+    service_user = build('oauth2', 'v2', credentials=creds)
+    user_info = service_user.userinfo().get().execute()
+
+    id_user = get_or_create_user(user_info['email'], user_info['name'])
+
+    session['user_id'] = id_user
+    session['creds'] = {
+        'token': creds.token,
+        'refresh_token': creds.refresh_token,
+        'token_uri': creds.token_uri,
+        'client_id': creds.client_id,
+        'client_secret': creds.client_secret,
+        'scopes': creds.scopes
+    }
+
+    return redirect(url_for('dashboard.dashboard'))

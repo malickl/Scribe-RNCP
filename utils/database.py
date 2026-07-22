@@ -57,3 +57,19 @@ def record_consent(id_user):
 
     cur.close()
     conn.close()
+
+def get_user_meetings(id_user):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT id_reunion, titre, date, theme, categorie, humeur, resume, actions
+        FROM reunions
+        WHERE id_user = %s
+        ORDER BY date DESC
+    """, (id_user,))
+    rows = cur.fetchall()
+
+    cur.close()
+    conn.close()
+    return rows 

@@ -2,9 +2,15 @@
 Fonction liée à Groq : analyse de la transcription par le LLM.
 """
 
+import json
+
 def analyze(text, client, prompt):
-    """
-    Envoie le texte au LLM avec le prompt système, retourne un dict :
-    {"theme": ..., "categorie": ..., "humeur": ..., "resume": ..., "actions": [...]}
-    """
-    pass
+    completion = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": text}
+        ],
+        response_format={"type": "json_object"}
+    )
+    return json.loads(completion.choices[0].message.content)

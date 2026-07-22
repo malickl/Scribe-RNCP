@@ -4,7 +4,7 @@ Tableau de bord, filtres, suppression de compte.
 """
 
 from flask import Blueprint, session, redirect, url_for, render_template
-from utils.database import check_consent, get_user_meetings, get_user_recordings
+from utils.database import check_consent, record_consent, get_user_meetings, get_user_recordings
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
@@ -17,13 +17,13 @@ def dashboard():
     if not check_consent(session['user_id']):
         return render_template("consent.html")
 
-    reunions = get_user_meetings(session['user_id'])
-    dictaphones = get_user_recordings(session['user_id'])
+    meetings = get_user_meetings(session['user_id'])
+    recordings = get_user_recordings(session['user_id'])
 
-    return render_template("dashboard.html", reunions=reunions, dictaphones=dictaphones)
+    return render_template("dashboard.html", meetings=meetings, recordings=recordings)
 
 
-@dashboard_bp.route("/accepter_consentement", methods=["POST"])
-def accepter_consentement():
+@dashboard_bp.route("/accept_consent", methods=["POST"])
+def accept_consent():
     record_consent(session['user_id'])
     return redirect(url_for('dashboard.dashboard'))

@@ -21,3 +21,9 @@ def dashboard():
     dictaphones = get_user_recordings(session['user_id'])
 
     return render_template("dashboard.html", reunions=reunions, dictaphones=dictaphones)
+
+
+@dashboard_bp.route("/accepter_consentement", methods=["POST"])
+def accepter_consentement():
+    record_consent(session['user_id'])
+    return redirect(url_for('dashboard.dashboard'))

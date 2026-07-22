@@ -73,3 +73,19 @@ def get_user_meetings(id_user):
     cur.close()
     conn.close()
     return rows 
+
+def get_user_recordings(id_user):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT id_dictaphone, titre, date, theme, categorie, humeur, resume, actions
+        FROM dictaphones
+        WHERE id_user = %s
+        ORDER BY date DESC
+    """, (id_user,))
+    rows = cur.fetchall()
+
+    cur.close()
+    conn.close()
+    return rows

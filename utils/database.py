@@ -32,11 +32,16 @@ def get_or_create_user(email, nom):
     return id_user
 
 
-def insert_reunion(id_user, titre, date, participants, recall_bot_id):
-    """
-    Crée une ligne dans reunions avec les colonnes d'analyse vides. Retourne id_reunion.
-    """
-    pass
+def verifier_consentement(id_user):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT consentement_date FROM users WHERE id_user = %s", (id_user,))
+    row = cur.fetchone()
+
+    cur.close()
+    conn.close()
+    return row is not None and row[0] is not None
 
 
 def update_analyse(table, row_id, report):

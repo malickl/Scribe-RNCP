@@ -1,13 +1,35 @@
-"""
-Fonctions d'accès à PostgreSQL. Centralise les requêtes pour éviter de les dupliquer
-dans chaque route.
-"""
+import psycopg2
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+def get_connection():
+    return psycopg2.connect(os.getenv("DATABASE_URL"))
+
 
 def get_or_create_user(email, nom):
-    """
-    Cherche un utilisateur par email. Le crée s'il n'existe pas. Retourne son id_user.
-    """
-    pass
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT id_user FROM users WHERE email = %s", (email,))
+    row = cur.fetchone()
+
+    if row:
+        id_user = row[0]
+    else:
+        cur.execute("""
+            INSERT INTO users (nom, email)
+            VALUES (%s, %s)
+            RETURNING id_user
+        """, (nom, email))
+        id_user = cur.fetchone()[0]
+        conn.commit()
+
+    cur.close()
+    conn.close()
+    return id_user
 
 
 def insert_reunion(id_user, titre, date, participants, recall_bot_id):

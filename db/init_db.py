@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+conn = psycopg2.connect(os.getenv("DATABASE_PUBLIC_URL"))
 cur = conn.cursor()
 
 cur.execute("""

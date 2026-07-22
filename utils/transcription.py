@@ -20,7 +20,9 @@ def transcribe(filename, transcriber):
     return segments
 
 def format_transcription(segments):
-    """
-    Transforme la liste de segments en texte "Speaker A : ... / Speaker B : ..."
-    """
-    pass
+    texte = ""
+    for segment in segments:
+        speaker = segment["speaker"]
+        contenu = segment["text"]
+        texte += f"Speaker {speaker} : {contenu}\n"
+    return texte

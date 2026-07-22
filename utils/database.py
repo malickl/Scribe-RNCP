@@ -44,8 +44,16 @@ def check_consent(id_user):
     return row is not None and row[0] is not None
 
 
-def update_analyse(table, row_id, report):
-    """
-    Met à jour une ligne (reunions ou dictaphones) avec le résultat de l'analyse LLM.
-    """
-    pass
+def record_consent(id_user):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        UPDATE users
+        SET consentement_date = NOW()
+        WHERE id_user = %s
+    """, (id_user,))
+    conn.commit()
+
+    cur.close()
+    conn.close()

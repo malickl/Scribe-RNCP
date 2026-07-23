@@ -54,3 +54,11 @@ def callback():
     }
 
     return redirect(url_for('dashboard.dashboard'))
+
+
+
+@auth_bp.route("/conditions")
+def conditions():
+    with open("dpa.txt", "r", encoding="utf-8") as f:
+        contenu = f.read()
+    return f"<pre>{contenu}</pre>"

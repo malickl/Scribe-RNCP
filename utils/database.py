@@ -1,12 +1,13 @@
 import psycopg2
 import os
 from dotenv import load_dotenv
+import json 
 
 load_dotenv()
 
 
 def get_connection():
-    return psycopg2.connect(os.getenv("DATABASE_URL"))
+    return psycopg2.connect(os.getenv("DATABASE_PUBLIC_URL"))
 
 
 def get_or_create_user(email, nom):
@@ -61,18 +62,20 @@ def record_consent(id_user):
 def get_user_meetings(id_user):
     conn = get_connection()
     cur = conn.cursor()
-
     cur.execute("""
         SELECT id_reunion, titre, date, theme, categorie, humeur, resume, actions
-        FROM reunions
-        WHERE id_user = %s
-        ORDER BY date DESC
+        FROM reunions WHERE id_user = %s ORDER BY date DESC
     """, (id_user,))
     rows = cur.fetchall()
-
     cur.close()
     conn.close()
-    return rows
+
+    result = []
+    for row in rows:
+        row = list(row)
+        row[7] = json.loads(row[7]) if row[7] else []
+        result.append(row)
+    return result
 
 def get_user_recordings(id_user):
     conn = get_connection()
@@ -88,4 +91,10 @@ def get_user_recordings(id_user):
 
     cur.close()
     conn.close()
-    return rows
+
+    result = []
+    for row in rows:
+        row = list(row)
+        row[7] = json.loads(row[7]) if row[7] else []
+        result.append(row)
+    return result

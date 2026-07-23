@@ -8,6 +8,7 @@ from flask import Blueprint, request, session, redirect, url_for, jsonify
 from utils.database import insert_dictaphone
 from routes.pipeline import run_pipeline
 import threading
+from flask import render_template
 
 captation_bp = Blueprint("captation", __name__)
 
@@ -41,3 +42,9 @@ def dictaphone():
     ).start()
 
     return jsonify({"message": "Traitement en cours", "id": id_dictaphone}), 200
+
+
+
+@captation_bp.route("/dictaphone", methods=["GET"])
+def dictaphone_page():
+    return render_template("dictaphone.html")

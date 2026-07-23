@@ -98,3 +98,20 @@ def get_user_recordings(id_user):
         row[7] = json.loads(row[7]) if row[7] else []
         result.append(row)
     return result
+
+
+def insert_dictaphone(id_user, titre):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        INSERT INTO dictaphones (id_user, titre, date)
+        VALUES (%s, %s, NOW())
+        RETURNING id_dictaphone
+    """, (id_user, titre))
+    id_dictaphone = cur.fetchone()[0]
+    conn.commit()
+
+    cur.close()
+    conn.close()
+    return id_dictaphone

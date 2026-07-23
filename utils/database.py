@@ -115,3 +115,27 @@ def insert_dictaphone(id_user, titre):
     cur.close()
     conn.close()
     return id_dictaphone
+
+
+def update_analysis(table, row_id, report):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    column_id = "id_reunion" if table == "reunions" else "id_dictaphone"
+
+    cur.execute(f"""
+        UPDATE {table}
+        SET theme = %s, categorie = %s, humeur = %s, resume = %s, actions = %s
+        WHERE {column_id} = %s
+    """, (
+        report["theme"],
+        report["categorie"],
+        report["humeur"],
+        report["resume"],
+        json.dumps(report["actions"]),
+        row_id
+    ))
+    conn.commit()
+
+    cur.close()
+    conn.close()

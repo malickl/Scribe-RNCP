@@ -22,3 +22,18 @@ def delete_recording(recording_id):
     recording_id vient du webhook bot.done, champ data.recording.id (distinct du bot_id).
     """
     pass
+def get_audio(bot_id):
+    url = f"https://eu-central-1.recall.ai/api/v1/bot/{bot_id}/"
+    headers = {"Authorization": f"Token {RECALL_API_KEY}"}
+
+    r = requests.get(url, headers=headers)
+    bot_data = r.json()
+
+    audio_url = bot_data["recordings"][0]["media_shortcuts"]["audio_mixed"]["data"]["download_url"]
+    audio_response = requests.get(audio_url)
+
+    filename = f"reunion_{bot_id}.mp3"
+    with open(filename, "wb") as f:
+        f.write(audio_response.content)
+
+    return filename

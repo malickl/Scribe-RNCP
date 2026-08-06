@@ -139,3 +139,14 @@ def update_analysis(table, row_id, report):
 
     cur.close()
     conn.close()
+
+def get_reunion_by_bot_id(bot_id):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT id_reunion FROM reunions WHERE recall_bot_id = %s", (bot_id,))
+    row = cur.fetchone()
+
+    cur.close()
+    conn.close()
+    return row[0] if row else None

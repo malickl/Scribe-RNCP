@@ -48,3 +48,31 @@ def dictaphone():
 @captation_bp.route("/dictaphone", methods=["GET"])
 def dictaphone_page():
     return render_template("dictaphone.html")
+
+from routes.pipeline import run_pipeline
+from utils.recall import get_audio
+from utils.database import get_reunion_by_bot_id
+import threading
+
+@captation_bp.route("/webhook/recall", methods=["POST"])
+def webhook_recall():
+    data = request.json
+
+    if data.get("event") != "bot.done":
+        return '', 200
+
+    bot_id = data["data"]["bot"]["id"]
+
+    id_reunion = get_reunion_by_bot_id(bot_id)
+    if id_reunion is None:
+        return '', 200
+
+    filename = get_audio(bot_id)
+
+    threading.Thread(
+        target=run_pipeline,
+        args=(filename, "reunions", id_reunion),
+        daemon=True
+    ).start()
+
+    return '', 200

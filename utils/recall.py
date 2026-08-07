@@ -37,3 +37,9 @@ def get_audio(bot_id):
         f.write(audio_response.content)
 
     return filename
+
+def delete_recording(recording_id):
+    url = f"https://eu-central-1.recall.ai/api/v1/recording/{recording_id}/"
+    headers = {"Authorization": f"Token {RECALL_API_KEY}"}
+
+    requests.delete(url, headers=headers)

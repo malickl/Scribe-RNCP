@@ -150,3 +150,20 @@ def get_reunion_by_bot_id(bot_id):
     cur.close()
     conn.close()
     return row[0] if row else None
+
+
+def insert_reunion(id_user, titre, date, recall_bot_id):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        INSERT INTO reunions (id_user, titre, date, recall_bot_id)
+        VALUES (%s, %s, %s, %s)
+        RETURNING id_reunion
+    """, (id_user, titre, date, recall_bot_id))
+    id_reunion = cur.fetchone()[0]
+    conn.commit()
+
+    cur.close()
+    conn.close()
+    return id_reunion

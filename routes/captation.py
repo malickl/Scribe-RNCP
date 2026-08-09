@@ -10,9 +10,12 @@ from routes.pipeline import run_pipeline
 from googleapiclient.discovery import build
 import threading
 from flask import render_template
-
 from google.oauth2.credentials import Credentials
 from datetime import datetime, timezone
+from utils.recall import get_audio
+from utils.database import get_reunion_by_bot_id
+from utils.database import insert_reunion
+from utils.recall import send_bot
 
 captation_bp = Blueprint("captation", __name__)
 
@@ -73,10 +76,7 @@ def dictaphone():
 def dictaphone_page():
     return render_template("dictaphone.html")
 
-from routes.pipeline import run_pipeline
-from utils.recall import get_audio
-from utils.database import get_reunion_by_bot_id
-import threading
+
 
 @captation_bp.route("/webhook/recall", methods=["POST"])
 def webhook_recall():
@@ -100,3 +100,18 @@ def webhook_recall():
     ).start()
 
     return '', 200
+
+@captation_bp.route("/envoyer_bot", methods=["POST"])
+def envoyer_bot():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+
+    link = request.form.get('link')
+    title = request.form.get('title')
+    date = request.form.get('date')
+
+    bot_id = send_bot(link)
+
+    insert_reunion(session['user_id'], title, date, bot_id)
+
+    return redirect(url_for('captation.reunions'))

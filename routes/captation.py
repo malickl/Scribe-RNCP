@@ -9,8 +9,11 @@ from utils.database import insert_dictaphone
 from routes.pipeline import run_pipeline
 from googleapiclient.discovery import build
 import threading
+import os
+import uuid
 from flask import render_template
 from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request as GoogleRequest
 from datetime import datetime, timezone
 from utils.recall import get_audio
 from utils.database import get_reunion_by_bot_id
@@ -25,6 +28,10 @@ def reunions():
         return redirect(url_for('auth.login'))
 
     creds = Credentials(**session['creds'])
+    if creds.expired and creds.refresh_token:
+        creds.refresh(GoogleRequest())
+        session['creds']['token'] = creds.token
+
     service = build('calendar', 'v3', credentials=creds)
 
     now = datetime.now(timezone.utc).isoformat()
@@ -57,7 +64,8 @@ def dictaphone():
         return redirect(url_for('auth.login'))
 
     audio = request.files["audio"]
-    filename = f"dictaphone_{session['user_id']}.wav"
+    extension = os.path.splitext(audio.filename)[1] or ".webm"
+    filename = f"dictaphone_{session['user_id']}_{uuid.uuid4().hex}{extension}"
     audio.save(filename)
 
     id_dictaphone = insert_dictaphone(session['user_id'], "Enregistrement")
@@ -110,7 +118,10 @@ def envoyer_bot():
     title = request.form.get('title')
     date = request.form.get('date')
 
-    bot_id = send_bot(link)
+    try:
+        bot_id = send_bot(link)
+    except RuntimeError:
+        return redirect(url_for('captation.reunions'))
 
     insert_reunion(session['user_id'], title, date, bot_id)
 

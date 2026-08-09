@@ -25,5 +25,8 @@ def dashboard():
 
 @dashboard_bp.route("/accept_consent", methods=["POST"])
 def accept_consent():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+
     record_consent(session['user_id'])
     return redirect(url_for('dashboard.dashboard'))

@@ -8,7 +8,7 @@ load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 ASSEMBLYAI_API_KEY = os.getenv("ASSEMBLYAI_API_KEY")
 RECALL_API_KEY = os.getenv("RECALL_API_KEY")
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_PUBLIC_URL = os.getenv("DATABASE_PUBLIC_URL")
 
 client_groq = Groq(api_key=GROQ_API_KEY)
 

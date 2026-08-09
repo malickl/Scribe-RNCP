@@ -9,14 +9,21 @@ from utils.transcription import transcribe, format_transcription
 from utils.analysis import analyze
 from utils.database import update_analysis
 from config import transcriber, client_groq, system_prompt
+import logging
 import os
+
+logger = logging.getLogger(__name__)
 
 
 def run_pipeline(filename, table, row_id):
-    segments = transcribe(filename, transcriber)
-    text = format_transcription(segments)
-    report = analyze(text, client_groq, system_prompt)
+    try:
+        segments = transcribe(filename, transcriber)
+        text = format_transcription(segments)
+        report = analyze(text, client_groq, system_prompt)
 
-    update_analysis(table, row_id, report)
-
-    os.remove(filename)
+        update_analysis(table, row_id, report)
+    except Exception:
+        logger.exception("Échec du pipeline pour %s.%s (fichier %s)", table, row_id, filename)
+    finally:
+        if os.path.exists(filename):
+            os.remove(filename)

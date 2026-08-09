@@ -1,8 +1,287 @@
 <!DOCTYPE html>
-<html>
-<head><title>Dashboard - Scribe</title></head>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau de bord — Scribe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F1115;
+    --surface: #171A20;
+    --surface-hover: #1D2129;
+    --border: #262B34;
+    --text-primary: #E8EAED;
+    --text-secondary: #8B92A0;
+    --text-muted: #5A6070;
+    --accent: #5EEAD4;
+    --accent-dim: rgba(94, 234, 212, 0.12);
+    --warn: #F5A97F;
+    --warn-dim: rgba(245, 169, 127, 0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 48px 24px 96px;
+  }
+
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  .top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 40px;
+    letter-spacing: -0.01em;
+  }
+
+  .nav-links { display: flex; gap: 10px; }
+
+  .pill {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 100px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .pill:hover { border-color: var(--accent); color: var(--accent); }
+  .pill.record { border-color: var(--accent); color: var(--accent); }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 22px;
+    margin: 40px 0 16px;
+    color: var(--text-primary);
+  }
+  h2:first-of-type { margin-top: 0; }
+
+  .item {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .wave-bg {
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    opacity: 0.14;
+    pointer-events: none;
+  }
+  .wave-bg span { display: block; width: 3px; border-radius: 2px; background: var(--accent); }
+
+  .item-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .item-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  .item-date { color: var(--text-muted); font-size: 13px; white-space: nowrap; }
+
+  .item-meta {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .tag {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-weight: 500;
+  }
+  .tag-theme { background: var(--accent-dim); color: var(--accent); }
+  .tag-mood { background: #262B34; color: var(--text-secondary); }
+
+  .item-resume {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.55;
+    position: relative;
+    z-index: 1;
+  }
+
+  .actions-list {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    position: relative;
+    z-index: 1;
+  }
+  .actions-list ul { list-style: none; padding: 0; }
+  .actions-list li {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    padding: 4px 0 4px 18px;
+    position: relative;
+  }
+  .actions-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .pending {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--warn);
+    font-size: 13.5px;
+    background: var(--warn-dim);
+    padding: 6px 12px;
+    border-radius: 100px;
+    position: relative;
+    z-index: 1;
+  }
+  .pending .dot-pulse {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--warn);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .empty {
+    color: var(--text-muted);
+    font-size: 14.5px;
+    padding: 20px 0;
+  }
+
+  @media (max-width: 560px) {
+    h1 { font-size: 32px; }
+    .item { padding: 18px; }
+    .item-head { flex-direction: column; gap: 2px; }
+  }
+</style>
+</head>
 <body>
-  <h1>Mes réunions</h1>
-  <p>Tableau de bord à compléter.</p>
+
+<div class="wrap">
+  <div class="top">
+    <h1>Tableau de bord</h1>
+    <div class="nav-links">
+      <a href="/dictaphone" class="pill record">Nouvel enregistrement</a>
+      <a href="/reunions" class="pill">Mes réunions</a>
+    </div>
+  </div>
+
+  <h2>Réunions</h2>
+  {% if meetings %}
+    {% for id, titre, date, theme, categorie, humeur, resume, actions in meetings %}
+      <div class="item">
+        <div class="wave-bg">
+          {% for h in [10,20,14,26,16,22,12,18] %}
+            <span style="height:{{ h }}px"></span>
+          {% endfor %}
+        </div>
+        <div class="item-head">
+          <div class="item-title">{{ titre }}</div>
+          <div class="item-date">{{ date }}</div>
+        </div>
+        {% if resume %}
+          <div class="item-meta">
+            {% if theme %}<span class="tag tag-theme">{{ theme }}</span>{% endif %}
+            {% if categorie %}<span class="tag tag-mood">{{ categorie }}</span>{% endif %}
+            {% if humeur %}<span class="tag tag-mood">{{ humeur }}</span>{% endif %}
+          </div>
+          <p class="item-resume">{{ resume }}</p>
+          {% if actions %}
+            <div class="actions-list">
+              <ul>
+                {% for a in actions %}
+                  <li>{{ a }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        {% else %}
+          <span class="pending"><span class="dot-pulse"></span>Traitement en cours</span>
+        {% endif %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="empty">Aucune réunion enregistrée pour le moment.</p>
+  {% endif %}
+
+  <h2>Dictaphones</h2>
+  {% if recordings %}
+    {% for id, titre, date, theme, categorie, humeur, resume, actions in recordings %}
+      <div class="item">
+        <div class="wave-bg">
+          {% for h in [10,20,14,26,16,22,12,18] %}
+            <span style="height:{{ h }}px"></span>
+          {% endfor %}
+        </div>
+        <div class="item-head">
+          <div class="item-title">{{ titre }}</div>
+          <div class="item-date">{{ date }}</div>
+        </div>
+        {% if resume %}
+          <div class="item-meta">
+            {% if theme %}<span class="tag tag-theme">{{ theme }}</span>{% endif %}
+            {% if categorie %}<span class="tag tag-mood">{{ categorie }}</span>{% endif %}
+            {% if humeur %}<span class="tag tag-mood">{{ humeur }}</span>{% endif %}
+          </div>
+          <p class="item-resume">{{ resume }}</p>
+          {% if actions %}
+            <div class="actions-list">
+              <ul>
+                {% for a in actions %}
+                  <li>{{ a }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        {% else %}
+          <span class="pending"><span class="dot-pulse"></span>Traitement en cours</span>
+        {% endif %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="empty">Aucun dictaphone enregistré pour le moment.</p>
+  {% endif %}
+</div>
+
 </body>
 </html>

@@ -1,8 +1,245 @@
 <!DOCTYPE html>
-<html>
-<head><title>Dictaphone - Scribe</title></head>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dictaphone — Scribe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F1115;
+    --surface: #171A20;
+    --border: #262B34;
+    --text-primary: #E8EAED;
+    --text-secondary: #8B92A0;
+    --text-muted: #5A6070;
+    --accent: #5EEAD4;
+    --accent-dim: rgba(94, 234, 212, 0.12);
+    --danger: #F5A97F;
+    --danger-dim: rgba(245, 169, 127, 0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .wrap { max-width: 420px; width: 100%; text-align: center; }
+
+  .back {
+    display: inline-block;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 100px;
+    margin-bottom: 40px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .back:hover { border-color: var(--accent); color: var(--accent); }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 32px;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+
+  .sub {
+    color: var(--text-muted);
+    font-size: 14.5px;
+    margin-bottom: 48px;
+  }
+
+  .stage {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 48px 32px;
+    margin-bottom: 24px;
+  }
+
+  .dial {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 32px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .dial.live {
+    border-color: var(--danger);
+    animation: ring 1.6s ease-out infinite;
+  }
+  @keyframes ring {
+    0% { box-shadow: 0 0 0 0 var(--danger-dim); }
+    100% { box-shadow: 0 0 0 16px rgba(245, 169, 127, 0); }
+  }
+
+  .bars { display: flex; align-items: center; gap: 4px; height: 40px; }
+  .bars span {
+    display: block;
+    width: 4px;
+    border-radius: 2px;
+    background: var(--accent);
+    height: 8px;
+    transition: height 0.15s ease;
+  }
+  .dial.live .bars span { animation: wave 1s ease-in-out infinite; }
+  .bars span:nth-child(1) { animation-delay: 0s; }
+  .bars span:nth-child(2) { animation-delay: 0.1s; }
+  .bars span:nth-child(3) { animation-delay: 0.2s; }
+  .bars span:nth-child(4) { animation-delay: 0.3s; }
+  .bars span:nth-child(5) { animation-delay: 0.4s; }
+  @keyframes wave {
+    0%, 100% { height: 8px; }
+    50% { height: 36px; }
+  }
+
+  .timer {
+    font-family: 'Fraunces', serif;
+    font-variant-numeric: tabular-nums;
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .status {
+    color: var(--text-muted);
+    font-size: 14px;
+    min-height: 20px;
+  }
+  .status.live { color: var(--danger); }
+  .status.ok { color: var(--accent); }
+
+  .controls { display: flex; gap: 12px; }
+
+  .btn {
+    flex: 1;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn:active:not(:disabled) { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .btn-start { background: var(--accent); color: #0A1210; }
+  .btn-start:hover:not(:disabled) { opacity: 0.88; }
+
+  .btn-stop { background: var(--danger-dim); color: var(--danger); border: 1px solid rgba(245, 169, 127, 0.3); }
+  .btn-stop:hover:not(:disabled) { opacity: 0.85; }
+</style>
+</head>
 <body>
+
+<div class="wrap">
+  <a href="/dashboard" class="back">← Tableau de bord</a>
   <h1>Dictaphone</h1>
-  <p>Page dictaphone à compléter.</p>
+  <p class="sub">Enregistrez à la voix, Scribe s'occupe du reste.</p>
+
+  <div class="stage">
+    <div class="dial" id="dial">
+      <div class="bars">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+    <div class="timer" id="timer">00:00</div>
+    <p class="status" id="status">Prêt à enregistrer.</p>
+  </div>
+
+  <div class="controls">
+    <button id="btn-start" class="btn btn-start">🎙 Démarrer</button>
+    <button id="btn-stop" class="btn btn-stop" disabled>⏹ Arrêter et envoyer</button>
+  </div>
+</div>
+
+<script>
+let recorder;
+let morceaux = [];
+let startTime;
+let timerInterval;
+
+const dial = document.getElementById("dial");
+const timerEl = document.getElementById("timer");
+const statusEl = document.getElementById("status");
+const btnStart = document.getElementById("btn-start");
+const btnStop = document.getElementById("btn-stop");
+
+function formatTime(ms) {
+  const totalSec = Math.floor(ms / 1000);
+  const min = String(Math.floor(totalSec / 60)).padStart(2, "0");
+  const sec = String(totalSec % 60).padStart(2, "0");
+  return `${min}:${sec}`;
+}
+
+btnStart.onclick = async () => {
+  const flux = await navigator.mediaDevices.getUserMedia({ audio: true });
+  recorder = new MediaRecorder(flux);
+  morceaux = [];
+  recorder.ondataavailable = (e) => morceaux.push(e.data);
+  recorder.start();
+
+  startTime = Date.now();
+  timerInterval = setInterval(() => {
+    timerEl.textContent = formatTime(Date.now() - startTime);
+  }, 250);
+
+  dial.classList.add("live");
+  btnStart.disabled = true;
+  btnStop.disabled = false;
+  statusEl.textContent = "Enregistrement en cours...";
+  statusEl.className = "status live";
+};
+
+btnStop.onclick = () => {
+  recorder.stop();
+  recorder.onstop = async () => {
+    clearInterval(timerInterval);
+    dial.classList.remove("live");
+    statusEl.textContent = "Envoi en cours...";
+    statusEl.className = "status";
+
+    const audio = new Blob(morceaux, { type: recorder.mimeType });
+    const extension = recorder.mimeType.includes("webm") ? "webm" : "ogg";
+    const formData = new FormData();
+    formData.append("audio", audio, `audio.${extension}`);
+
+    try {
+      const reponse = await fetch("/dictaphone", { method: "POST", body: formData });
+      if (!reponse.ok) throw new Error("Échec de l'envoi");
+      await reponse.json();
+      statusEl.textContent = "Envoyé ! Traitement en cours — retrouvez-le sur le tableau de bord.";
+      statusEl.className = "status ok";
+    } catch (err) {
+      statusEl.textContent = "Erreur lors de l'envoi. Réessayez.";
+      statusEl.className = "status live";
+    }
+  };
+
+  btnStart.disabled = false;
+  btnStop.disabled = true;
+};
+</script>
 </body>
 </html>

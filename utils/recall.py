@@ -1,27 +1,24 @@
-"""
-Fonctions liées à l'API Recall : envoi du bot, récupération et suppression de l'audio.
-"""
+import requests
+import os
+
+RECALL_API_KEY = os.getenv("RECALL_API_KEY")
 
 def send_bot(lien_reunion):
-    """
-    Envoie un bot Recall sur le lien donné. Retourne le bot_id.
-    """
-    pass
+    url = "https://eu-central-1.recall.ai/api/v1/bot/"
+    headers = {
+        "Authorization": f"Token {RECALL_API_KEY}",
+        "content-type": "application/json"
+    }
+    payload = {
+        "meeting_url": lien_reunion,
+        "bot_name": "Bot Scribe",
+        "recording_config": {"audio_mixed_mp3": {}}
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+    return response.json()["id"]
 
 
-def get_audio(bot_id):
-    """
-    Télécharge l'audio depuis Recall, retourne le nom du fichier sauvegardé.
-    """
-    pass
-
-
-def delete_recording(recording_id):
-    """
-    Supprime l'enregistrement chez Recall via DELETE /api/v1/recording/{id}/
-    recording_id vient du webhook bot.done, champ data.recording.id (distinct du bot_id).
-    """
-    pass
 def get_audio(bot_id):
     url = f"https://eu-central-1.recall.ai/api/v1/bot/{bot_id}/"
     headers = {"Authorization": f"Token {RECALL_API_KEY}"}

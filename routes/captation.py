@@ -7,22 +7,46 @@ Ne pas séparer dictaphone dans un autre fichier : les deux modes de captation v
 from flask import Blueprint, request, session, redirect, url_for, jsonify
 from utils.database import insert_dictaphone
 from routes.pipeline import run_pipeline
+from googleapiclient.discovery import build
 import threading
 from flask import render_template
 
+from google.oauth2.credentials import Credentials
+from datetime import datetime, timezone
+
 captation_bp = Blueprint("captation", __name__)
 
-# @captation_bp.route("/reunions")
-# def reunions():
-#     ...
+@captation_bp.route("/reunions")
+def reunions():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
 
-# @captation_bp.route("/envoyer_bot", methods=["POST"])
-# def envoyer_bot():
-#     ...
+    creds = Credentials(**session['creds'])
+    service = build('calendar', 'v3', credentials=creds)
 
-# @captation_bp.route("/webhook/recall", methods=["POST"])
-# def webhook_recall():
-#     ...
+    now = datetime.now(timezone.utc).isoformat()
+
+    events = service.events().list(
+        calendarId='primary',
+        maxResults=20,
+        singleEvents=True,
+        orderBy='startTime',
+        timeMin=now
+    ).execute()
+
+    reunions_list = []
+    for event in events.get('items', []):
+        lien = event.get('hangoutLink')
+        if not lien:
+            continue
+        reunions_list.append({
+            "titre": event.get('summary', 'Sans titre'),
+            "date": event['start'].get('dateTime'),
+            "participants": [p['email'] for p in event.get('attendees', [])],
+            "lien": lien
+        })
+
+    return render_template("reunions.html", reunions=reunions_list)
 
 @captation_bp.route("/dictaphone", methods=["POST"])
 def dictaphone():

@@ -2,6 +2,8 @@
 Lot 1 : Identité & agenda
 OAuth Google, connexion, gestion des utilisateurs.
 """
+import json
+import os
 from flask import Blueprint, request, session, redirect, url_for
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
@@ -18,13 +20,25 @@ SCOPES = [
     'https://www.googleapis.com/auth/userinfo.profile'
 ]
 
-@auth_bp.route("/login")
-def login():
-    flow = Flow.from_client_secrets_file(
+
+def _build_flow(redirect_uri):
+    credentials_json = os.getenv("GOOGLE_CREDENTIALS_JSON")
+    if credentials_json:
+        return Flow.from_client_config(
+            json.loads(credentials_json),
+            scopes=SCOPES,
+            redirect_uri=redirect_uri
+        )
+    return Flow.from_client_secrets_file(
         'credentials.json',
         scopes=SCOPES,
-        redirect_uri='http://127.0.0.1:5001/callback'
+        redirect_uri=redirect_uri
     )
+
+
+@auth_bp.route("/login")
+def login():
+    flow = _build_flow(url_for('auth.callback', _external=True))
     auth_url, state = flow.authorization_url(prompt='select_account')
     flow_store[state] = flow
     return redirect(auth_url)

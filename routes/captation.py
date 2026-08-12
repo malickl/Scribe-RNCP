@@ -4,18 +4,22 @@ Regroupe les deux modes de captation audio : visio (bot Recall) et dictaphone (u
 Ne pas séparer dictaphone dans un autre fichier : les deux modes de captation vivent ici ensemble.
 """
 
-from flask import Blueprint, request, session, redirect, url_for, jsonify
+from flask import Blueprint, request, session, redirect, url_for, jsonify, render_template
 from utils.database import insert_dictaphone
 from utils.database import get_user
+from utils.database import get_bot_event_keys
 from routes.pipeline import run_pipeline
 from googleapiclient.discovery import build
 import threading
 import os
 import uuid
-from flask import render_template
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request as GoogleRequest
 from datetime import datetime, timezone
+from utils.recall import get_audio
+from utils.database import get_reunion_by_bot_id
+from utils.database import insert_reunion
+from utils.recall import send_bot
 
 JOURS_FR = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 MOIS_FR = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]
@@ -39,10 +43,7 @@ def _group_by_day(reunions_list):
             groups.append({"label": label, "reunions": []})
         groups[-1]["reunions"].append(r)
     return groups
-from utils.recall import get_audio
-from utils.database import get_reunion_by_bot_id
-from utils.database import insert_reunion
-from utils.recall import send_bot
+
 
 captation_bp = Blueprint("captation", __name__)
 
@@ -68,6 +69,8 @@ def reunions():
         timeMin=now
     ).execute()
 
+    bot_event_keys = get_bot_event_keys(session['user_id'])
+
     reunions_list = []
     for event in events.get('items', []):
         lien = event.get('hangoutLink')
@@ -75,13 +78,15 @@ def reunions():
         if not lien or not date_iso:
             continue
         dt = datetime.fromisoformat(date_iso.replace('Z', '+00:00'))
+        titre = event.get('summary', 'Sans titre')
         reunions_list.append({
-            "titre": event.get('summary', 'Sans titre'),
+            "titre": titre,
             "date": date_iso,
             "heure": dt.strftime("%Hh%M"),
             "jour_label": _jour_label(dt),
             "participants": [p['email'] for p in event.get('attendees', [])],
-            "lien": lien
+            "lien": lien,
+            "has_bot": (titre, dt.strftime('%Y-%m-%dT%H:%M:%S')) in bot_event_keys
         })
 
     return render_template(
@@ -101,7 +106,8 @@ def dictaphone():
     filename = f"dictaphone_{session['user_id']}_{uuid.uuid4().hex}{extension}"
     audio.save(filename)
 
-    id_dictaphone = insert_dictaphone(session['user_id'], "Enregistrement")
+    titre = request.form.get("titre", "").strip() or "Enregistrement dictaphone"
+    id_dictaphone = insert_dictaphone(session['user_id'], titre)
 
     threading.Thread(
         target=run_pipeline,

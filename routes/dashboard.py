@@ -4,10 +4,13 @@ Tableau de bord, filtres, suppression de compte.
 """
 
 from collections import Counter
-from flask import Blueprint, session, redirect, url_for, render_template
-from utils.database import check_consent, record_consent, get_user_meetings, get_user_recordings, get_user
+from datetime import datetime
+from flask import Blueprint, session, redirect, url_for, render_template, request
+from utils.database import check_consent, record_consent, get_user_meetings, get_user_recordings, get_user, rename_item
 
 dashboard_bp = Blueprint("dashboard", __name__)
+
+TABLES_RENOMMABLES = {"reunions", "dictaphones"}
 
 
 def _stats(meetings, recordings):
@@ -33,10 +36,18 @@ def _stats(meetings, recordings):
     }
 
 
+def _has_taken_place(date, resume):
+    """Une réunion visio programmée dans le futur n'a pas encore eu lieu :
+    on ne l'affiche nulle part au dashboard tant que ce n'est pas le cas."""
+    return bool(resume) or not date or date <= datetime.now()
+
+
 def _merged_items(meetings, recordings):
     items = []
     for type_, rows in (("visio", meetings), ("dicta", recordings)):
         for id_, titre, date, theme, categorie, humeur, resume, actions in rows:
+            if not _has_taken_place(date, resume):
+                continue
             items.append({
                 "type": type_,
                 "id": id_,
@@ -60,7 +71,7 @@ def dashboard():
     if not check_consent(session['user_id']):
         return render_template("consent.html")
 
-    meetings = get_user_meetings(session['user_id'])
+    meetings = [m for m in get_user_meetings(session['user_id']) if _has_taken_place(m[2], m[6])]
     recordings = get_user_recordings(session['user_id'])
     user = get_user(session['user_id'])
 
@@ -71,6 +82,21 @@ def dashboard():
         user=user,
         active_nav='dashboard'
     )
+
+
+@dashboard_bp.route("/renommer", methods=["POST"])
+def renommer():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+
+    table = request.form.get('table')
+    row_id = request.form.get('id')
+    titre = request.form.get('titre', '').strip()
+
+    if table in TABLES_RENOMMABLES and row_id and titre:
+        rename_item(session['user_id'], table, row_id, titre)
+
+    return redirect(url_for('dashboard.dashboard'))
 
 
 @dashboard_bp.route("/accept_consent", methods=["POST"])

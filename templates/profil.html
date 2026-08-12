@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Mon profil — Scribe{% endblock %}
+{% block topbar_title %}Mon profil{% endblock %}
+
+{% block extra_style %}
+  .profile-card { max-width: 420px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }
+  .profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--accent-bg); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 600; color: var(--accent-text); margin-bottom: 20px; }
+  .profile-field { padding: 14px 0; border-top: 1px solid var(--border); }
+  .profile-field:first-of-type { border-top: none; }
+  .profile-field-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .profile-field-value { font-size: 14px; color: var(--text-primary); }
+  .btn-danger-outline { background: transparent; border: 1px solid var(--danger); color: var(--danger-text); width: 100%; justify-content: center; margin-top: 24px; }
+  .btn-danger-outline:hover { background: var(--danger-bg); }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 100; display: none; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface-1); border: 1px solid var(--border-strong); border-radius: 16px; padding: 24px; width: 380px; max-width: 90vw; }
+  .modal-title { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px; }
+  .modal-text { font-size: 13.5px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+{% endblock %}
+
+{% block content %}
+<div class="content">
+  <div class="profile-card">
+    <div class="profile-avatar">{{ (user.nom or user.email)[:2]|upper }}</div>
+    <div class="profile-field">
+      <div class="profile-field-label">Nom</div>
+      <div class="profile-field-value">{{ user.nom or '—' }}</div>
+    </div>
+    <div class="profile-field">
+      <div class="profile-field-label">Email</div>
+      <div class="profile-field-value">{{ user.email }}</div>
+    </div>
+    <button class="btn btn-danger-outline" onclick="openLogoutModal()">
+      <i class="ti ti-logout"></i> Se déconnecter
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block panel %}
+<div class="modal-overlay" id="logout-overlay" onclick="closeLogoutModalOutside(event)">
+  <div class="modal">
+    <div class="modal-title">Se déconnecter ?</div>
+    <div class="modal-text">Voulez-vous vraiment vous déconnecter de Scribe ?</div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeLogoutModal()">Annuler</button>
+      <a href="/logout" class="btn btn-danger-outline" style="width:auto;margin-top:0;">Se déconnecter</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function openLogoutModal() { document.getElementById('logout-overlay').classList.add('open'); }
+  function closeLogoutModal() { document.getElementById('logout-overlay').classList.remove('open'); }
+  function closeLogoutModalOutside(e) { if (e.target.id === 'logout-overlay') closeLogoutModal(); }
+</script>
+{% endblock %}

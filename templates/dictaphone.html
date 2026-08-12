@@ -3,7 +3,8 @@
 {% block topbar_title %}Dictaphone{% endblock %}
 
 {% block extra_style %}
-  .dictaphone-view { display: flex; flex-direction: column; align-items: center; padding: 48px 24px; gap: 20px; overflow-y: auto; }
+  .dictaphone-view { display: flex; flex-direction: column; align-items: center; padding: 48px 24px; overflow-y: auto; width: 100%; }
+  #capture-step { display: flex; flex-direction: column; align-items: center; gap: 20px; width: 100%; max-width: 480px; }
   .mic-btn { width: 84px; height: 84px; border-radius: 50%; background: var(--accent); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
   .mic-btn:hover:not(:disabled) { background: #7B73FF; transform: scale(1.05); }
   .mic-btn:disabled { opacity: 0.35; cursor: not-allowed; }
@@ -21,28 +22,47 @@
   .consent-check input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
   .rec-status { font-size: 13px; color: var(--text-muted); text-align: center; min-height: 18px; }
   .timer { font-family: 'Fraunces', serif; font-variant-numeric: tabular-nums; font-size: 22px; font-weight: 600; color: var(--text-primary); }
+
+  .naming-step { display: none; flex-direction: column; align-items: center; gap: 14px; max-width: 420px; width: 100%; }
+  .naming-step.show { display: flex; }
+  .naming-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; color: var(--text-primary); }
+  .naming-hint { font-size: 13px; color: var(--text-muted); text-align: center; }
+  .naming-input { width: 100%; height: 42px; border-radius: var(--radius); border: 1px solid var(--border-strong); background: var(--surface-1); color: var(--text-primary); font-size: 14px; padding: 0 14px; font-family: inherit; outline: none; }
+  .naming-input:focus { border-color: var(--accent-border); }
 {% endblock %}
 
 {% block content %}
 <div class="dictaphone-view">
-  <div class="info-banner">
-    <i class="ti ti-shield-check"></i>
-    <p>Avant de démarrer, assurez-vous que tous les participants ont été informés et ont consenti à l'enregistrement de leur voix.</p>
+  <div id="capture-step">
+    <div class="info-banner">
+      <i class="ti ti-shield-check"></i>
+      <p>Avant de démarrer, assurez-vous que tous les participants ont été informés et ont consenti à l'enregistrement de leur voix.</p>
+    </div>
+    <label class="consent-check">
+      <input type="checkbox" id="consent-cb" onchange="toggleMic()">
+      Je confirme que tous les participants ont donné leur accord.
+    </label>
+    <button class="mic-btn" id="mic-btn" onclick="toggleRecording()" disabled>
+      <i class="ti ti-microphone" id="mic-icon"></i>
+    </button>
+    <div class="timer" id="timer" style="display:none;">00:00</div>
+    <div class="waveform" id="waveform">
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+    </div>
+    <div class="rec-status" id="rec-status">Cochez la case pour activer le micro.</div>
   </div>
-  <label class="consent-check">
-    <input type="checkbox" id="consent-cb" onchange="toggleMic()">
-    Je confirme que tous les participants ont donné leur accord.
-  </label>
-  <button class="mic-btn" id="mic-btn" onclick="toggleRecording()" disabled>
-    <i class="ti ti-microphone" id="mic-icon"></i>
-  </button>
-  <div class="timer" id="timer" style="display:none;">00:00</div>
-  <div class="waveform" id="waveform">
-    <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
-    <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
-    <div class="wave-bar"></div><div class="wave-bar"></div>
+
+  <div class="naming-step" id="naming-step">
+    <div class="naming-title">Nommer l'enregistrement</div>
+    <p class="naming-hint">Vous pourrez toujours le renommer plus tard depuis le tableau de bord.</p>
+    <input type="text" class="naming-input" id="recording-title" value="Enregistrement dictaphone">
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="envoyerEnregistrement()">
+      <i class="ti ti-check"></i> Valider et envoyer
+    </button>
+    <div class="rec-status" id="naming-status"></div>
   </div>
-  <div class="rec-status" id="rec-status">Cochez la case pour activer le micro.</div>
 </div>
 {% endblock %}
 
@@ -53,6 +73,7 @@ let morceaux = [];
 let consentGiven = false;
 let isRecording = false;
 let startTime, timerInterval;
+let recordedBlob, recordedExtension;
 
 function toggleMic() {
   consentGiven = document.getElementById('consent-cb').checked;
@@ -96,29 +117,43 @@ async function toggleRecording() {
     status.textContent = 'Enregistrement en cours...';
   } else {
     recorder.stop();
-    recorder.onstop = async () => {
+    recorder.onstop = () => {
       clearInterval(timerInterval);
-      status.textContent = "Envoi en cours...";
 
-      const audio = new Blob(morceaux, { type: recorder.mimeType });
-      const extension = recorder.mimeType.includes("webm") ? "webm" : "ogg";
-      const formData = new FormData();
-      formData.append("audio", audio, `audio.${extension}`);
+      recordedBlob = new Blob(morceaux, { type: recorder.mimeType });
+      recordedExtension = recorder.mimeType.includes("webm") ? "webm" : "ogg";
 
-      try {
-        const reponse = await fetch("/dictaphone", { method: "POST", body: formData });
-        if (!reponse.ok) throw new Error("Échec de l'envoi");
-        await reponse.json();
-        status.textContent = "Envoyé ! Traitement en cours — retrouvez-le sur le tableau de bord.";
-      } catch (err) {
-        status.textContent = "Erreur lors de l'envoi. Réessayez.";
-      }
+      document.getElementById('capture-step').style.display = 'none';
+      document.getElementById('naming-step').classList.add('show');
+      const input = document.getElementById('recording-title');
+      input.focus();
+      input.select();
     };
 
     isRecording = false;
     btn.classList.remove('recording');
     icon.className = 'ti ti-microphone';
     wave.classList.remove('active');
+  }
+}
+
+async function envoyerEnregistrement() {
+  const status = document.getElementById('naming-status');
+  const titre = document.getElementById('recording-title').value.trim() || "Enregistrement dictaphone";
+
+  status.textContent = "Envoi en cours...";
+
+  const formData = new FormData();
+  formData.append("audio", recordedBlob, `audio.${recordedExtension}`);
+  formData.append("titre", titre);
+
+  try {
+    const reponse = await fetch("/dictaphone", { method: "POST", body: formData });
+    if (!reponse.ok) throw new Error("Échec de l'envoi");
+    await reponse.json();
+    status.textContent = "Envoyé ! Traitement en cours — retrouvez-le sur le tableau de bord.";
+  } catch (err) {
+    status.textContent = "Erreur lors de l'envoi. Réessayez.";
   }
 }
 </script>

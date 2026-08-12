@@ -4,10 +4,10 @@ OAuth Google, connexion, gestion des utilisateurs.
 """
 import json
 import os
-from flask import Blueprint, request, session, redirect, url_for
+from flask import Blueprint, request, session, redirect, url_for, render_template
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
-from utils.database import get_or_create_user
+from utils.database import get_or_create_user, get_user
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -71,6 +71,20 @@ def callback():
 
     return redirect(url_for('dashboard.dashboard'))
 
+
+
+@auth_bp.route("/profil")
+def profil():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+
+    return render_template("profil.html", user=get_user(session['user_id']))
+
+
+@auth_bp.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
 
 
 @auth_bp.route("/conditions")

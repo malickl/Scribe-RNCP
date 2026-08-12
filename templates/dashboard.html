@@ -47,11 +47,20 @@
 
   .panel { width: 360px; min-width: 360px; border-left: 1px solid var(--border); background: var(--surface-1); display: none; flex-direction: column; overflow-y: auto; }
   .panel.open { display: flex; }
-  .tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 20px; background: var(--surface-1); position: sticky; top: 0; z-index: 5; }
+  .tabs { display: flex; align-items: center; border-bottom: 1px solid var(--border); padding: 0 8px 0 20px; background: var(--surface-1); position: sticky; top: 0; z-index: 5; }
   .tab { padding: 13px 14px; font-size: 13px; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
   .tab.active { color: var(--accent-text); border-bottom-color: var(--accent); }
+  .tab-close { margin-left: auto; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius); color: var(--text-muted); cursor: pointer; font-size: 16px; transition: all 0.15s; }
+  .tab-close:hover { background: var(--surface-2); color: var(--text-primary); }
   .panel-header { padding: 18px 20px; border-bottom: 1px solid var(--border); }
+  .panel-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
   .panel-title { font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; line-height: 1.4; }
+  .panel-edit-icon { color: var(--text-muted); cursor: pointer; font-size: 15px; flex-shrink: 0; padding: 2px; transition: color 0.15s; }
+  .panel-edit-icon:hover { color: var(--accent-text); }
+  .rename-form { display: none; gap: 6px; margin-bottom: 4px; }
+  .rename-form.show { display: flex; }
+  .rename-input { flex: 1; height: 30px; border-radius: var(--radius); border: 1px solid var(--accent-border); background: var(--surface-2); color: var(--text-primary); font-size: 13px; padding: 0 10px; font-family: inherit; outline: none; }
+  .rename-save { width: 30px; height: 30px; border-radius: var(--radius); border: none; background: var(--accent); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .panel-meta { font-size: 12px; color: var(--text-muted); }
   .panel-tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
   .panel-section { padding: 16px 20px; border-bottom: 1px solid var(--border); }
@@ -112,13 +121,15 @@
     <div class="meeting-list" id="meeting-list">
       {% for item in items %}
         <div class="meeting-card"
+          data-id="{{ item.id }}"
+          data-table="{{ 'reunions' if item.type == 'visio' else 'dictaphones' }}"
           data-titre="{{ item.titre }}"
           data-date="{{ item.date }}"
           data-theme="{{ item.theme or '' }}"
           data-categorie="{{ item.categorie or '' }}"
           data-humeur="{{ item.humeur or '' }}"
           data-resume="{{ item.resume or '' }}"
-          data-actions="{{ (item.actions or [])|tojson }}"
+          data-actions="{{ (item.actions or [])|tojson|forceescape }}"
           onclick="selectMeeting(this)">
           <div class="meeting-icon {{ item.type }}"><i class="ti ti-{{ 'video' if item.type == 'visio' else 'microphone' }}"></i></div>
           <div class="meeting-body">
@@ -150,10 +161,20 @@
   <div class="tabs">
     <div class="tab active" onclick="switchTab('resume')">Résumé</div>
     <div class="tab" onclick="switchTab('actions')">Actions</div>
+    <div class="tab-close" onclick="closePanel()"><i class="ti ti-x"></i></div>
   </div>
   <div class="tab-content active" id="tab-resume">
     <div class="panel-header">
-      <div class="panel-title" id="panel-title">—</div>
+      <div class="panel-title-row">
+        <div class="panel-title" id="panel-title">—</div>
+        <i class="ti ti-pencil panel-edit-icon" onclick="toggleRename()" title="Renommer"></i>
+      </div>
+      <form class="rename-form" id="rename-form" action="/renommer" method="POST">
+        <input type="hidden" name="table" id="rename-table">
+        <input type="hidden" name="id" id="rename-id">
+        <input type="text" name="titre" id="rename-input" class="rename-input">
+        <button type="submit" class="rename-save" title="Enregistrer"><i class="ti ti-check"></i></button>
+      </form>
       <div class="panel-meta" id="panel-meta">—</div>
       <div class="panel-tags" id="panel-tags"></div>
     </div>
@@ -173,6 +194,17 @@
 
 {% block scripts %}
 <script>
+  function closePanel() {
+    document.getElementById('detail-panel').classList.remove('open');
+    document.querySelectorAll('.meeting-card').forEach(c => c.classList.remove('selected'));
+  }
+
+  function toggleRename() {
+    const form = document.getElementById('rename-form');
+    form.classList.toggle('show');
+    if (form.classList.contains('show')) document.getElementById('rename-input').focus();
+  }
+
   function switchTab(tab) {
     document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ['resume','actions'][i] === tab));
     document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', ['tab-resume','tab-actions'][i] === 'tab-' + tab));
@@ -185,6 +217,10 @@
     const d = el.dataset;
     document.getElementById('panel-title').textContent = d.titre;
     document.getElementById('panel-meta').textContent = d.date;
+    document.getElementById('rename-table').value = d.table;
+    document.getElementById('rename-id').value = d.id;
+    document.getElementById('rename-input').value = d.titre;
+    document.getElementById('rename-form').classList.remove('show');
 
     let tags = '';
     if (d.theme) tags += `<span class="tag tag-theme">${d.theme}</span>`;
@@ -201,10 +237,6 @@
 
     document.getElementById('detail-panel').classList.add('open');
     switchTab('resume');
-  }
-
-  if (document.querySelector('.tag-pending')) {
-    setTimeout(() => location.reload(), 8000);
   }
 </script>
 {% endblock %}

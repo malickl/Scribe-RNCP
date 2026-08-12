@@ -6,6 +6,7 @@ Ne pas séparer dictaphone dans un autre fichier : les deux modes de captation v
 
 from flask import Blueprint, request, session, redirect, url_for, jsonify
 from utils.database import insert_dictaphone
+from utils.database import get_user
 from routes.pipeline import run_pipeline
 from googleapiclient.discovery import build
 import threading
@@ -56,7 +57,7 @@ def reunions():
             "lien": lien
         })
 
-    return render_template("reunions.html", reunions=reunions_list)
+    return render_template("reunions.html", reunions=reunions_list, user=get_user(session['user_id']), active_nav='reunions')
 
 @captation_bp.route("/dictaphone", methods=["POST"])
 def dictaphone():
@@ -82,7 +83,10 @@ def dictaphone():
 
 @captation_bp.route("/dictaphone", methods=["GET"])
 def dictaphone_page():
-    return render_template("dictaphone.html")
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+
+    return render_template("dictaphone.html", user=get_user(session['user_id']), active_nav='dictaphone')
 
 
 

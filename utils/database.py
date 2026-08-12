@@ -129,6 +129,23 @@ def insert_dictaphone(id_user, titre):
     return id_dictaphone
 
 
+def rename_item(id_user, table, row_id, titre):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    column_id = "id_reunion" if table == "reunions" else "id_dictaphone"
+
+    cur.execute(f"""
+        UPDATE {table}
+        SET titre = %s
+        WHERE {column_id} = %s AND id_user = %s
+    """, (titre, row_id, id_user))
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+
 def update_analysis(table, row_id, report):
     conn = get_connection()
     cur = conn.cursor()
@@ -162,6 +179,20 @@ def get_reunion_by_bot_id(bot_id):
     cur.close()
     conn.close()
     return row[0] if row else None
+
+
+def get_bot_event_keys(id_user):
+    """(titre, date) des réunions déjà envoyées à un bot, pour détecter les doublons
+    sans colonne dédiée : on réutilise titre+date, déjà stockés tels quels."""
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT titre, date FROM reunions WHERE id_user = %s", (id_user,))
+    rows = cur.fetchall()
+
+    cur.close()
+    conn.close()
+    return {(titre, date.strftime('%Y-%m-%dT%H:%M:%S')) for titre, date in rows if date}
 
 
 def insert_reunion(id_user, titre, date, recall_bot_id):

@@ -33,6 +33,18 @@ def get_or_create_user(email, nom):
     return id_user
 
 
+def get_user(id_user):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT nom, email FROM users WHERE id_user = %s", (id_user,))
+    row = cur.fetchone()
+
+    cur.close()
+    conn.close()
+    return {"nom": row[0], "email": row[1]} if row else None
+
+
 def check_consent(id_user):
     conn = get_connection()
     cur = conn.cursor()

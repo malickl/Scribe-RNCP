@@ -1,303 +1,93 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mes réunions — Scribe</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0F1115;
-    --surface: #171A20;
-    --surface-hover: #1D2129;
-    --border: #262B34;
-    --text-primary: #E8EAED;
-    --text-secondary: #8B92A0;
-    --text-muted: #5A6070;
-    --accent: #5EEAD4;
-    --accent-dim: rgba(94, 234, 212, 0.12);
-    --warn: #F5A97F;
-    --warn-dim: rgba(245, 169, 127, 0.12);
-  }
+{% extends "base.html" %}
+{% block title %}Mes réunions — Scribe{% endblock %}
+{% block topbar_title %}Mes réunions{% endblock %}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+{% block extra_style %}
+  .meeting-list { display: flex; flex-direction: column; gap: 8px; }
+  .meeting-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 16px; transition: all 0.15s; }
+  .meeting-card:hover { border-color: var(--border-strong); background: var(--surface-2); }
+  .meeting-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; background: var(--accent-bg); color: var(--accent-text); border: 1px solid var(--accent-border); }
+  .meeting-body { flex: 1; min-width: 0; }
+  .meeting-title { font-size: 14px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .meeting-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .participants { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .participant { display: flex; align-items: center; gap: 6px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; font-size: 11.5px; color: var(--text-secondary); }
 
-  body {
-    background: var(--bg);
-    color: var(--text-primary);
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-    padding: 48px 24px 96px;
-  }
-
-  .wrap { max-width: 720px; margin: 0 auto; }
-
-  .top {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 8px;
-  }
-
-  h1 {
-    font-family: 'Fraunces', serif;
-    font-optical-sizing: auto;
-    font-weight: 600;
-    font-size: 40px;
-    letter-spacing: -0.01em;
-  }
-
-  .back {
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 14px;
-    border: 1px solid var(--border);
-    padding: 8px 14px;
-    border-radius: 100px;
-    transition: border-color 0.15s, color 0.15s;
-  }
-  .back:hover { border-color: var(--accent); color: var(--accent); }
-
-  .sub {
-    color: var(--text-muted);
-    font-size: 15px;
-    margin-bottom: 40px;
-  }
-
-  .card {
-    position: relative;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px 24px 22px;
-    margin-bottom: 14px;
-    overflow: hidden;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .card:hover { border-color: #333a46; background: var(--surface-hover); }
-
-  .wave-bg {
-    position: absolute;
-    right: -10px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    opacity: 0.18;
-    pointer-events: none;
-  }
-  .wave-bg span {
-    display: block;
-    width: 3px;
-    border-radius: 2px;
-    background: var(--accent);
-  }
-
-  .card-title {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 20px;
-    margin-bottom: 6px;
-    position: relative;
-    z-index: 1;
-    max-width: 85%;
-  }
-
-  .card-meta {
-    color: var(--text-secondary);
-    font-size: 13.5px;
-    margin-bottom: 14px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .card-meta .dot { color: var(--text-muted); margin: 0 6px; }
-
-  .participants {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 18px;
-    position: relative;
-    z-index: 1;
-  }
-  .chip {
-    font-size: 12.5px;
-    color: var(--text-secondary);
-    background: #1D2129;
-    border: 1px solid var(--border);
-    padding: 4px 10px;
-    border-radius: 100px;
-  }
-
-  .card-actions { position: relative; z-index: 1; display: flex; gap: 10px; }
-
-  .btn {
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 18px;
-    cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s;
-  }
-  .btn:active { transform: scale(0.98); }
-
-  .btn-primary { background: var(--accent); color: #0A1210; }
-  .btn-primary:hover { opacity: 0.88; }
-
-  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
-  .btn-ghost:hover { border-color: var(--text-muted); color: var(--text-primary); }
-
-  .empty {
-    text-align: center;
-    padding: 80px 20px;
-    color: var(--text-muted);
-  }
-  .empty-title {
-    font-family: 'Fraunces', serif;
-    font-size: 22px;
-    color: var(--text-secondary);
-    margin-bottom: 8px;
-  }
-
-  /* Modal de confirmation */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(6, 7, 9, 0.72);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    z-index: 50;
-  }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 100; display: none; }
   .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface-1); border: 1px solid var(--border-strong); border-radius: 16px; padding: 24px; width: 420px; max-width: 90vw; }
+  .modal-title { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; }
+  .modal-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+  .modal-consent { background: var(--warning-bg); border: 1px solid rgba(245,166,35,0.2); border-radius: 8px; padding: 12px; font-size: 12px; color: var(--warning-text); line-height: 1.6; margin-bottom: 16px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+{% endblock %}
 
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 32px;
-    max-width: 420px;
-    width: 100%;
-  }
-  .modal h2 {
-    font-family: 'Fraunces', serif;
-    font-size: 22px;
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
-  .modal p {
-    color: var(--text-secondary);
-    font-size: 14.5px;
-    line-height: 1.6;
-    margin-bottom: 24px;
-  }
-  .modal p strong { color: var(--text-primary); font-weight: 500; }
-  .modal-row { display: flex; gap: 10px; justify-content: flex-end; }
-
-  @media (max-width: 560px) {
-    h1 { font-size: 32px; }
-    .card { padding: 20px; }
-    .wave-bg { opacity: 0.1; }
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .card { animation: rise 0.35s ease-out backwards; }
-  }
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-</style>
-</head>
-<body>
-
-<div class="wrap">
-  <div class="top">
-    <h1>Vos réunions</h1>
-    <a href="/dashboard" class="back">← Tableau de bord</a>
-  </div>
-  <p class="sub">Ces rendez-vous viennent de votre agenda. Choisissez lesquels Scribe doit enregistrer.</p>
+{% block content %}
+<div class="content">
+  <p style="color:var(--text-muted);font-size:13.5px;margin-bottom:20px;">Ces rendez-vous viennent de votre agenda Google. Choisissez lesquels Scribe doit enregistrer.</p>
 
   {% if reunions %}
-    {% for r in reunions %}
-      <div class="card" style="animation-delay: {{ loop.index0 * 0.05 }}s">
-        <div class="wave-bg">
-          {% for h in [14,26,18,32,12,24,20,30,16,22,28,10,18] %}
-            <span style="height:{{ h }}px"></span>
-          {% endfor %}
-        </div>
-        <div class="card-title">{{ r.titre }}</div>
-        <div class="card-meta">
-          {{ r.date }}
-          {% if r.participants %}
-            <span class="dot">·</span>{{ r.participants|length }} participant{{ 's' if r.participants|length > 1 else '' }}
-          {% endif %}
-        </div>
-        {% if r.participants %}
-          <div class="participants">
-            {% for p in r.participants[:5] %}
-              <span class="chip">{{ p }}</span>
-            {% endfor %}
-            {% if r.participants|length > 5 %}
-              <span class="chip">+{{ r.participants|length - 5 }}</span>
+    <div class="meeting-list">
+      {% for r in reunions %}
+        <div class="meeting-card">
+          <div class="meeting-icon"><i class="ti ti-video"></i></div>
+          <div class="meeting-body">
+            <div class="meeting-title">{{ r.titre }}</div>
+            <div class="meeting-meta">{{ r.date }}{% if r.participants %} · {{ r.participants|length }} participant{{ 's' if r.participants|length > 1 else '' }}{% endif %}</div>
+            {% if r.participants %}
+              <div class="participants">
+                {% for p in r.participants[:5] %}<span class="participant"><i class="ti ti-user"></i>{{ p }}</span>{% endfor %}
+                {% if r.participants|length > 5 %}<span class="participant">+{{ r.participants|length - 5 }}</span>{% endif %}
+              </div>
             {% endif %}
           </div>
-        {% endif %}
-        <div class="card-actions">
-          <button class="btn btn-primary" data-titre="{{ r.titre }}" data-date="{{ r.date }}" data-lien="{{ r.lien }}" onclick="openModal(this.dataset.titre, this.dataset.date, this.dataset.lien)">
-            Affecter un bot
+          <button class="btn btn-primary"
+            data-titre="{{ r.titre }}" data-date="{{ r.date }}" data-lien="{{ r.lien }}"
+            onclick="openModal(this.dataset.titre, this.dataset.date, this.dataset.lien)">
+            <i class="ti ti-robot"></i> Affecter un bot
           </button>
         </div>
-      </div>
-    {% endfor %}
-  {% else %}
-    <div class="empty">
-      <div class="empty-title">Rien à l'horizon</div>
-      <p>Aucune réunion avec un lien de visioconférence n'est prévue pour l'instant.</p>
+      {% endfor %}
     </div>
+  {% else %}
+    <p class="empty">Aucune réunion avec un lien de visioconférence n'est prévue pour l'instant.</p>
   {% endif %}
 </div>
+{% endblock %}
 
-<div class="modal-overlay" id="modalOverlay">
+{% block panel %}
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
   <div class="modal">
-    <h2>Envoyer un bot ?</h2>
-    <p>
-      Scribe rejoindra <strong id="modalTitre"></strong> à titre silencieux et enregistrera l'audio
-      pour en produire le compte-rendu. Assurez-vous que les participants en ont été informés.
-    </p>
+    <div class="modal-title" id="modal-titre">—</div>
+    <div class="modal-meta" id="modal-date">—</div>
+    <div class="modal-consent">
+      <strong>Consentement requis</strong><br>
+      Scribe rejoindra cette réunion à titre silencieux et enregistrera l'audio pour en produire le compte-rendu. Assurez-vous que les participants en ont été informés.
+    </div>
     <form action="/envoyer_bot" method="POST">
-      <input type="hidden" name="title" id="formTitle">
-      <input type="hidden" name="date" id="formDate">
-      <input type="hidden" name="link" id="formLink">
-      <div class="modal-row">
-        <button type="button" class="btn btn-ghost" onclick="closeModal()">Annuler</button>
-        <button type="submit" class="btn btn-primary">Confirmer l'envoi</button>
+      <input type="hidden" name="title" id="form-titre">
+      <input type="hidden" name="date" id="form-date">
+      <input type="hidden" name="link" id="form-lien">
+      <div class="modal-actions">
+        <button type="button" class="btn" onclick="closeModal()">Annuler</button>
+        <button type="submit" class="btn btn-primary"><i class="ti ti-robot"></i> Confirmer l'envoi</button>
       </div>
     </form>
   </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script>
   function openModal(titre, date, lien) {
-    document.getElementById('modalTitre').textContent = titre;
-    document.getElementById('formTitle').value = titre;
-    document.getElementById('formDate').value = date;
-    document.getElementById('formLink').value = lien;
-    document.getElementById('modalOverlay').classList.add('open');
+    document.getElementById('modal-titre').textContent = titre;
+    document.getElementById('modal-date').textContent = date;
+    document.getElementById('form-titre').value = titre;
+    document.getElementById('form-date').value = date;
+    document.getElementById('form-lien').value = lien;
+    document.getElementById('modal-overlay').classList.add('open');
   }
-  function closeModal() {
-    document.getElementById('modalOverlay').classList.remove('open');
-  }
-  document.getElementById('modalOverlay').addEventListener('click', (e) => {
-    if (e.target.id === 'modalOverlay') closeModal();
-  });
+  function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+  function closeModalOutside(e) { if (e.target.id === 'modal-overlay') closeModal(); }
 </script>
-
-</body>
-</html>
+{% endblock %}

@@ -11,6 +11,8 @@ from utils.database import get_or_create_user
 
 auth_bp = Blueprint("auth", __name__)
 
+# En mémoire process : nécessite un seul worker gunicorn (voir Procfile), sinon
+# le worker qui reçoit /callback peut ne pas être celui qui a créé le flow.
 flow_store = {}
 
 SCOPES = [

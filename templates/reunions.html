@@ -3,9 +3,18 @@
 {% block topbar_title %}Mes réunions{% endblock %}
 
 {% block extra_style %}
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before { content: ""; position: absolute; left: 6px; top: 6px; bottom: 6px; width: 1px; background: var(--border); }
+
+  .day-group { margin-bottom: 28px; }
+  .day-group:last-child { margin-bottom: 0; }
+  .day-label { position: relative; font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; }
+  .day-label::before { content: ""; position: absolute; left: -28px; top: 3px; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); box-shadow: 0 0 0 1px var(--accent-border); }
+
   .meeting-list { display: flex; flex-direction: column; gap: 8px; }
   .meeting-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 16px; transition: all 0.15s; }
   .meeting-card:hover { border-color: var(--border-strong); background: var(--surface-2); }
+  .meeting-time { width: 56px; flex-shrink: 0; font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; color: var(--accent-text); text-align: center; }
   .meeting-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; background: var(--accent-bg); color: var(--accent-text); border: 1px solid var(--accent-border); }
   .meeting-body { flex: 1; min-width: 0; }
   .meeting-title { font-size: 14px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -20,32 +29,44 @@
   .modal-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
   .modal-consent { background: var(--warning-bg); border: 1px solid rgba(245,166,35,0.2); border-radius: 8px; padding: 12px; font-size: 12px; color: var(--warning-text); line-height: 1.6; margin-bottom: 16px; }
   .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+  @media (max-width: 560px) {
+    .meeting-time { display: none; }
+  }
 {% endblock %}
 
 {% block content %}
 <div class="content">
-  <p style="color:var(--text-muted);font-size:13.5px;margin-bottom:20px;">Ces rendez-vous viennent de votre agenda Google. Choisissez lesquels Scribe doit enregistrer.</p>
+  <p style="color:var(--text-muted);font-size:13.5px;margin-bottom:24px;">Ces rendez-vous viennent de votre agenda Google. Choisissez lesquels Scribe doit enregistrer.</p>
 
-  {% if reunions %}
-    <div class="meeting-list">
-      {% for r in reunions %}
-        <div class="meeting-card">
-          <div class="meeting-icon"><i class="ti ti-video"></i></div>
-          <div class="meeting-body">
-            <div class="meeting-title">{{ r.titre }}</div>
-            <div class="meeting-meta">{{ r.date }}{% if r.participants %} · {{ r.participants|length }} participant{{ 's' if r.participants|length > 1 else '' }}{% endif %}</div>
-            {% if r.participants %}
-              <div class="participants">
-                {% for p in r.participants[:5] %}<span class="participant"><i class="ti ti-user"></i>{{ p }}</span>{% endfor %}
-                {% if r.participants|length > 5 %}<span class="participant">+{{ r.participants|length - 5 }}</span>{% endif %}
+  {% if jours %}
+    <div class="timeline">
+      {% for jour in jours %}
+        <div class="day-group">
+          <div class="day-label">{{ jour.label }}</div>
+          <div class="meeting-list">
+            {% for r in jour.reunions %}
+              <div class="meeting-card">
+                <div class="meeting-time">{{ r.heure }}</div>
+                <div class="meeting-icon"><i class="ti ti-video"></i></div>
+                <div class="meeting-body">
+                  <div class="meeting-title">{{ r.titre }}</div>
+                  {% if r.participants %}
+                    <div class="meeting-meta">{{ r.participants|length }} participant{{ 's' if r.participants|length > 1 else '' }}</div>
+                    <div class="participants">
+                      {% for p in r.participants[:5] %}<span class="participant"><i class="ti ti-user"></i>{{ p }}</span>{% endfor %}
+                      {% if r.participants|length > 5 %}<span class="participant">+{{ r.participants|length - 5 }}</span>{% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+                <button class="btn btn-primary"
+                  data-titre="{{ r.titre }}" data-date="{{ r.date }}" data-lien="{{ r.lien }}"
+                  onclick="openModal(this.dataset.titre, this.dataset.date, this.dataset.lien)">
+                  <i class="ti ti-robot"></i> Affecter un bot
+                </button>
               </div>
-            {% endif %}
+            {% endfor %}
           </div>
-          <button class="btn btn-primary"
-            data-titre="{{ r.titre }}" data-date="{{ r.date }}" data-lien="{{ r.lien }}"
-            onclick="openModal(this.dataset.titre, this.dataset.date, this.dataset.lien)">
-            <i class="ti ti-robot"></i> Affecter un bot
-          </button>
         </div>
       {% endfor %}
     </div>

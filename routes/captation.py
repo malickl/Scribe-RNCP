@@ -16,6 +16,29 @@ from flask import render_template
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request as GoogleRequest
 from datetime import datetime, timezone
+
+JOURS_FR = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+MOIS_FR = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]
+
+
+def _jour_label(dt):
+    aujourdhui = datetime.now(dt.tzinfo).date()
+    diff = (dt.date() - aujourdhui).days
+    if diff == 0:
+        return "Aujourd'hui"
+    if diff == 1:
+        return "Demain"
+    return f"{JOURS_FR[dt.weekday()].capitalize()} {dt.day} {MOIS_FR[dt.month - 1]}"
+
+
+def _group_by_day(reunions_list):
+    groups = []
+    for r in reunions_list:
+        label = r["jour_label"]
+        if not groups or groups[-1]["label"] != label:
+            groups.append({"label": label, "reunions": []})
+        groups[-1]["reunions"].append(r)
+    return groups
 from utils.recall import get_audio
 from utils.database import get_reunion_by_bot_id
 from utils.database import insert_reunion
@@ -48,16 +71,25 @@ def reunions():
     reunions_list = []
     for event in events.get('items', []):
         lien = event.get('hangoutLink')
-        if not lien:
+        date_iso = event['start'].get('dateTime')
+        if not lien or not date_iso:
             continue
+        dt = datetime.fromisoformat(date_iso.replace('Z', '+00:00'))
         reunions_list.append({
             "titre": event.get('summary', 'Sans titre'),
-            "date": event['start'].get('dateTime'),
+            "date": date_iso,
+            "heure": dt.strftime("%Hh%M"),
+            "jour_label": _jour_label(dt),
             "participants": [p['email'] for p in event.get('attendees', [])],
             "lien": lien
         })
 
-    return render_template("reunions.html", reunions=reunions_list, user=get_user(session['user_id']), active_nav='reunions')
+    return render_template(
+        "reunions.html",
+        jours=_group_by_day(reunions_list),
+        user=get_user(session['user_id']),
+        active_nav='reunions'
+    )
 
 @captation_bp.route("/dictaphone", methods=["POST"])
 def dictaphone():

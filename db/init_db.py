@@ -48,6 +48,14 @@ cur.execute("""
     )
 """)
 
+cur.execute("""
+    CREATE TABLE IF NOT EXISTS reunion_participants (
+        id_reunion UUID REFERENCES reunions(id_reunion) ON DELETE CASCADE,
+        id_user UUID REFERENCES users(id_user) ON DELETE CASCADE,
+        PRIMARY KEY (id_reunion, id_user)
+    )
+""")
+
 conn.commit()
 cur.close()
 conn.close()

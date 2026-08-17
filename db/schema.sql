@@ -35,3 +35,12 @@ CREATE TABLE dictaphones (
     resume TEXT,
     actions TEXT
 );
+
+-- Participants Scribe d'une réunion visio, au-delà de celui qui a envoyé le
+-- bot (reunions.id_user). Permet à plusieurs utilisateurs de recevoir le
+-- même compte-rendu sans envoyer chacun leur propre bot.
+CREATE TABLE reunion_participants (
+    id_reunion UUID REFERENCES reunions(id_reunion) ON DELETE CASCADE,
+    id_user UUID REFERENCES users(id_user) ON DELETE CASCADE,
+    PRIMARY KEY (id_reunion, id_user)
+);

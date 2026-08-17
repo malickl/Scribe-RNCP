@@ -70,9 +70,12 @@ def record_consent(id_user):
 def get_user_meetings(id_user):
     with get_cursor() as cur:
         cur.execute("""
-            SELECT id_reunion, titre, date, theme, categorie, humeur, resume, actions
-            FROM reunions WHERE id_user = %s ORDER BY date DESC
-        """, (id_user,))
+            SELECT DISTINCT r.id_reunion, r.titre, r.date, r.theme, r.categorie, r.humeur, r.resume, r.actions
+            FROM reunions r
+            LEFT JOIN reunion_participants rp ON rp.id_reunion = r.id_reunion
+            WHERE r.id_user = %s OR rp.id_user = %s
+            ORDER BY r.date DESC
+        """, (id_user, id_user))
         rows = cur.fetchall()
 
     result = []
@@ -147,13 +150,38 @@ def get_reunion_by_bot_id(bot_id):
         return row[0] if row else None
 
 
-def get_bot_event_keys(id_user):
-    """(titre, date) des réunions déjà envoyées à un bot, pour détecter les doublons
-    sans colonne dédiée : on réutilise titre+date, déjà stockés tels quels."""
+def get_all_reunion_keys():
+    """(titre, date) -> id_reunion pour TOUTES les réunions, tous utilisateurs
+    confondus : sert à détecter qu'un bot a déjà été envoyé pour un événement
+    donné par n'importe qui, sans colonne google_event_id dédiée."""
     with get_cursor() as cur:
-        cur.execute("SELECT titre, date FROM reunions WHERE id_user = %s", (id_user,))
+        cur.execute("SELECT titre, date, id_reunion FROM reunions")
         rows = cur.fetchall()
-    return {(titre, date.strftime('%Y-%m-%dT%H:%M:%S')) for titre, date in rows if date}
+    return {
+        (titre, date.strftime('%Y-%m-%dT%H:%M:%S')): id_reunion
+        for titre, date, id_reunion in rows if date
+    }
+
+
+def get_user_reunion_ids(id_user):
+    """id_reunion auxquelles l'utilisateur a déjà accès, en tant qu'expéditeur
+    du bot ou en tant que participant ajouté après coup."""
+    with get_cursor() as cur:
+        cur.execute("""
+            SELECT id_reunion FROM reunions WHERE id_user = %s
+            UNION
+            SELECT id_reunion FROM reunion_participants WHERE id_user = %s
+        """, (id_user, id_user))
+        return {row[0] for row in cur.fetchall()}
+
+
+def add_reunion_participant(id_reunion, id_user):
+    with get_cursor(commit=True) as cur:
+        cur.execute("""
+            INSERT INTO reunion_participants (id_reunion, id_user)
+            VALUES (%s, %s)
+            ON CONFLICT DO NOTHING
+        """, (id_reunion, id_user))
 
 
 def insert_reunion(id_user, titre, date, recall_bot_id):
@@ -163,4 +191,12 @@ def insert_reunion(id_user, titre, date, recall_bot_id):
             VALUES (%s, %s, %s, %s)
             RETURNING id_reunion
         """, (id_user, titre, date, recall_bot_id))
-        return cur.fetchone()[0]
+        id_reunion = cur.fetchone()[0]
+
+        cur.execute("""
+            INSERT INTO reunion_participants (id_reunion, id_user)
+            VALUES (%s, %s)
+            ON CONFLICT DO NOTHING
+        """, (id_reunion, id_user))
+
+        return id_reunion

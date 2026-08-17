@@ -8,8 +8,6 @@ from flask import Blueprint, request, session, redirect, url_for, jsonify, rende
 from utils.database import insert_dictaphone
 from utils.database import get_user
 from utils.database import get_all_reunion_keys
-from utils.database import get_user_reunion_ids
-from utils.database import add_reunion_participant
 from routes.pipeline import run_pipeline
 from googleapiclient.discovery import build
 import threading
@@ -77,7 +75,6 @@ def reunions():
     ).execute()
 
     all_reunion_keys = get_all_reunion_keys()
-    mes_reunion_ids = get_user_reunion_ids(session['user_id'])
 
     reunions_list = []
     for event in events.get('items', []):
@@ -88,14 +85,6 @@ def reunions():
         dt = datetime.fromisoformat(date_iso.replace('Z', '+00:00'))
         titre = event.get('summary', 'Sans titre')
 
-        id_reunion = all_reunion_keys.get(_event_key(titre, date_iso))
-        if id_reunion is None:
-            statut = "aucun_bot"
-        elif id_reunion in mes_reunion_ids:
-            statut = "deja_recu"
-        else:
-            statut = "bot_dun_autre"
-
         reunions_list.append({
             "titre": titre,
             "date": date_iso,
@@ -103,8 +92,7 @@ def reunions():
             "jour_label": _jour_label(dt),
             "participants": [p['email'] for p in event.get('attendees', [])],
             "lien": lien,
-            "statut": statut,
-            "id_reunion": id_reunion
+            "has_bot": _event_key(titre, date_iso) in all_reunion_keys
         })
 
     return render_template(
@@ -177,6 +165,7 @@ def envoyer_bot():
     link = request.form.get('link')
     title = request.form.get('title')
     date = request.form.get('date')
+    participants = [e for e in request.form.get('participants', '').split(',') if e]
 
     if _event_key(title, date) in get_all_reunion_keys():
         # Un bot a déjà été envoyé pour cette réunion (par n'importe qui)
@@ -188,18 +177,6 @@ def envoyer_bot():
     except RuntimeError:
         return redirect(url_for('captation.reunions'))
 
-    insert_reunion(session['user_id'], title, date, bot_id)
-
-    return redirect(url_for('captation.reunions'))
-
-
-@captation_bp.route("/recevoir_compte_rendu", methods=["POST"])
-def recevoir_compte_rendu():
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
-
-    id_reunion = request.form.get('id_reunion')
-    if id_reunion:
-        add_reunion_participant(id_reunion, session['user_id'])
+    insert_reunion(session['user_id'], title, date, bot_id, participant_emails=participants)
 
     return redirect(url_for('captation.reunions'))

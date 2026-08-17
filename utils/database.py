@@ -163,28 +163,10 @@ def get_all_reunion_keys():
     }
 
 
-def get_user_reunion_ids(id_user):
-    """id_reunion auxquelles l'utilisateur a déjà accès, en tant qu'expéditeur
-    du bot ou en tant que participant ajouté après coup."""
-    with get_cursor() as cur:
-        cur.execute("""
-            SELECT id_reunion FROM reunions WHERE id_user = %s
-            UNION
-            SELECT id_reunion FROM reunion_participants WHERE id_user = %s
-        """, (id_user, id_user))
-        return {row[0] for row in cur.fetchall()}
-
-
-def add_reunion_participant(id_reunion, id_user):
-    with get_cursor(commit=True) as cur:
-        cur.execute("""
-            INSERT INTO reunion_participants (id_reunion, id_user)
-            VALUES (%s, %s)
-            ON CONFLICT DO NOTHING
-        """, (id_reunion, id_user))
-
-
-def insert_reunion(id_user, titre, date, recall_bot_id):
+def insert_reunion(id_user, titre, date, recall_bot_id, participant_emails=None):
+    """Crée la réunion, rattache son expéditeur, et rattache automatiquement
+    tout autre invité (participant_emails) qui a déjà un compte Scribe —
+    ils recevront le compte-rendu sur leur dashboard sans rien faire."""
     with get_cursor(commit=True) as cur:
         cur.execute("""
             INSERT INTO reunions (id_user, titre, date, recall_bot_id)
@@ -198,5 +180,16 @@ def insert_reunion(id_user, titre, date, recall_bot_id):
             VALUES (%s, %s)
             ON CONFLICT DO NOTHING
         """, (id_reunion, id_user))
+
+        if participant_emails:
+            cur.execute("""
+                SELECT id_user FROM users WHERE email = ANY(%s)
+            """, (participant_emails,))
+            for (autre_id_user,) in cur.fetchall():
+                cur.execute("""
+                    INSERT INTO reunion_participants (id_reunion, id_user)
+                    VALUES (%s, %s)
+                    ON CONFLICT DO NOTHING
+                """, (id_reunion, autre_id_user))
 
         return id_reunion

@@ -15,6 +15,89 @@
 
   .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .section-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+  .filter-form { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .filter-form > .filter-group { display: none; }
+  .type-tabs { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+  .filter-pill,
+  .filter-select-wrap,
+  .date-trigger {
+    min-height: 38px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    background: rgba(255,255,255,0.04);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .filter-pill { padding: 0 18px; cursor: pointer; }
+  .filter-pill:hover,
+  .filter-select-wrap:hover,
+  .date-trigger:hover { border-color: var(--accent-border); background: var(--surface-2); }
+  .filter-pill.active {
+    color: var(--accent-text);
+    border-color: var(--accent-border);
+    background: var(--accent-bg);
+    box-shadow: inset 0 0 0 1px rgba(108,99,255,0.1);
+  }
+  .filter-select-wrap { position: relative; display: inline-flex; align-items: center; padding: 0 36px 0 16px; }
+  .filter-select-wrap i { position: absolute; right: 13px; color: var(--text-muted); pointer-events: none; }
+  .filter-select {
+    appearance: none;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .filter-select option { background: var(--surface-1); color: var(--text-primary); }
+  .date-filter { position: relative; }
+  .date-trigger { display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; cursor: pointer; }
+  .date-trigger.active { color: var(--accent-text); border-color: var(--accent-border); background: var(--accent-bg); }
+  .date-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 280px;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface-1);
+    box-shadow: 0 18px 45px rgba(0,0,0,0.35);
+    display: none;
+    z-index: 20;
+  }
+  .date-popover.open { display: block; }
+  .date-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .date-field label { display: block; margin-bottom: 6px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .date-field input {
+    width: 100%;
+    height: 36px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-primary);
+    padding: 0 9px;
+    font: inherit;
+    font-size: 12px;
+  }
+  .date-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+  .date-action {
+    height: 32px;
+    padding: 0 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    background: var(--surface-2);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .date-action.primary { background: var(--accent); border-color: transparent; color: #fff; }
 
   .chart-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin-bottom: 28px; }
   .chart-title { font-size: 11px; color: var(--text-muted); margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -72,6 +155,19 @@
   .action-text { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
   .tab-content { display: none; }
   .tab-content.active { display: block; }
+  @media (max-width: 720px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .filter-form { align-items: stretch; }
+    .type-tabs,
+    .filter-select-wrap,
+    .date-filter,
+    .date-trigger { width: 100%; }
+    .type-tabs { display: grid; grid-template-columns: repeat(3, 1fr); }
+    .filter-pill { padding: 0 10px; }
+    .filter-select-wrap { justify-content: space-between; }
+    .filter-select { width: 100%; }
+    .date-popover { left: 0; right: auto; width: min(280px, calc(100vw - 112px)); }
+  }
 {% endblock %}
 
 {% block content %}
@@ -116,6 +212,65 @@
   <div class="section-header">
     <div class="section-title">Réunions récentes</div>
   </div>
+  <form class="filter-form" id="filter-form" action="{{ url_for('dashboard.dashboard') }}" method="GET">
+    <input type="hidden" name="type" id="type-filter" value="{{ type_filter or '' }}">
+
+    <div class="type-tabs" aria-label="Filtrer par type">
+      <button type="button" class="filter-pill {% if not type_filter %}active{% endif %}" onclick="setTypeFilter('')">Tout</button>
+      <button type="button" class="filter-pill {% if type_filter == 'visio' %}active{% endif %}" onclick="setTypeFilter('visio')">Visio</button>
+      <button type="button" class="filter-pill {% if type_filter == 'dicta' %}active{% endif %}" onclick="setTypeFilter('dicta')">Dictaphone</button>
+    </div>
+
+    <label class="filter-select-wrap">
+      <select class="filter-select" name="categorie" onchange="submitFilters()">
+        <option value="">Cat&eacute;gorie : toutes</option>
+        {% for cat, count in stats.categories %}
+          <option value="{{ cat }}" {% if categorie_filter == cat %}selected{% endif %}>Cat&eacute;gorie : {{ cat }}</option>
+        {% endfor %}
+      </select>
+      <i class="ti ti-chevron-down"></i>
+    </label>
+
+    <label class="filter-select-wrap">
+      <select class="filter-select" name="periode" onchange="submitFilters()">
+        <option value="">P&eacute;riode : tout</option>
+        <option value="7j" {% if periode_filter == '7j' %}selected{% endif %}>P&eacute;riode : 7 jours</option>
+        <option value="30j" {% if periode_filter == '30j' %}selected{% endif %}>P&eacute;riode : 30 jours</option>
+      </select>
+      <i class="ti ti-chevron-down"></i>
+    </label>
+
+    <div class="date-filter">
+      <button
+        type="button"
+        class="date-trigger {% if date_debut_filter or date_fin_filter %}active{% endif %}"
+        onclick="toggleDatePopover()"
+        aria-expanded="false"
+        aria-controls="date-popover"
+      >
+        <i class="ti ti-calendar"></i>
+        <span>{{ 'Dates actives' if date_debut_filter or date_fin_filter else 'Dates' }}</span>
+        <i class="ti ti-chevron-down"></i>
+      </button>
+      <div class="date-popover" id="date-popover">
+        <div class="date-fields">
+          <div class="date-field">
+            <label for="date-debut">D&eacute;but</label>
+            <input type="date" id="date-debut" name="date_debut" value="{{ date_debut_filter or '' }}">
+          </div>
+          <div class="date-field">
+            <label for="date-fin">Fin</label>
+            <input type="date" id="date-fin" name="date_fin" value="{{ date_fin_filter or '' }}">
+          </div>
+        </div>
+        <div class="date-actions">
+          <button type="button" class="date-action" onclick="resetDateFilters()">R&eacute;initialiser</button>
+          <button type="submit" class="date-action primary">Appliquer</button>
+        </div>
+      </div>
+    </div>
+
+</form>
 
   {% if items %}
     <div class="meeting-list" id="meeting-list">
@@ -194,6 +349,39 @@
 
 {% block scripts %}
 <script>
+  function submitFilters() {
+    document.getElementById('filter-form').submit();
+  }
+
+  function setTypeFilter(type) {
+    document.getElementById('type-filter').value = type;
+    submitFilters();
+  }
+
+  function toggleDatePopover() {
+    const popover = document.getElementById('date-popover');
+    const trigger = document.querySelector('.date-trigger');
+    const isOpen = popover.classList.toggle('open');
+    trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }
+
+  function resetDateFilters() {
+    document.getElementById('date-debut').value = '';
+    document.getElementById('date-fin').value = '';
+    submitFilters();
+  }
+
+  document.addEventListener('click', function(event) {
+    const dateFilter = document.querySelector('.date-filter');
+    const popover = document.getElementById('date-popover');
+    const trigger = document.querySelector('.date-trigger');
+
+    if (!dateFilter || !popover || !trigger || dateFilter.contains(event.target)) return;
+
+    popover.classList.remove('open');
+    trigger.setAttribute('aria-expanded', 'false');
+  });
+
   function closePanel() {
     document.getElementById('detail-panel').classList.remove('open');
     document.querySelectorAll('.meeting-card').forEach(c => c.classList.remove('selected'));

@@ -67,6 +67,12 @@ def record_consent(id_user):
         """, (id_user,))
 
 
+def delete_user(id_user):
+    """Supprime définitivement un utilisateur sans supprimer ses contenus."""
+    with get_cursor(commit=True) as cur:
+        cur.execute("DELETE FROM users WHERE id_user = %s", (id_user,))
+
+
 def get_user_meetings(id_user):
     with get_cursor() as cur:
         cur.execute("""

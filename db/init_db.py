@@ -19,7 +19,7 @@ cur.execute("""
 cur.execute("""
     CREATE TABLE IF NOT EXISTS reunions (
         id_reunion UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        id_user UUID REFERENCES users(id_user) ON DELETE CASCADE,
+        id_user UUID REFERENCES users(id_user) ON DELETE SET NULL,
         titre VARCHAR(200),
         date TIMESTAMP,
         duree_secondes INTEGER,
@@ -36,7 +36,7 @@ cur.execute("""
 cur.execute("""
     CREATE TABLE IF NOT EXISTS dictaphones (
         id_dictaphone UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        id_user UUID REFERENCES users(id_user) ON DELETE CASCADE,
+        id_user UUID REFERENCES users(id_user) ON DELETE SET NULL,
         titre VARCHAR(200),
         date TIMESTAMP,
         duree_secondes INTEGER,

@@ -7,7 +7,7 @@ import os
 from flask import Blueprint, request, session, redirect, url_for, render_template
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
-from utils.database import get_or_create_user, get_user
+from utils.database import get_or_create_user, get_user, delete_user
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -92,3 +92,13 @@ def conditions():
     with open("dpa.txt", "r", encoding="utf-8") as f:
         contenu = f.read()
     return f"<pre>{contenu}</pre>"
+
+
+@auth_bp.route("/supprimer_compte", methods=["POST"])
+def delete_account():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+
+    delete_user(session['user_id'])
+    session.clear()
+    return redirect(url_for('index'))

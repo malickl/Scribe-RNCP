@@ -56,6 +56,26 @@ cur.execute("""
     )
 """)
 
+cur.execute("""
+    ALTER TABLE reunions
+    DROP CONSTRAINT IF EXISTS reunions_id_user_fkey
+""")
+cur.execute("""
+    ALTER TABLE reunions
+    ADD CONSTRAINT reunions_id_user_fkey
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE SET NULL
+""")
+
+cur.execute("""
+    ALTER TABLE dictaphones
+    DROP CONSTRAINT IF EXISTS dictaphones_id_user_fkey
+""")
+cur.execute("""
+    ALTER TABLE dictaphones
+    ADD CONSTRAINT dictaphones_id_user_fkey
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE SET NULL
+""")
+
 conn.commit()
 cur.close()
 conn.close()

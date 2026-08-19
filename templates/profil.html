@@ -35,6 +35,21 @@
     <button class="btn btn-danger-outline" onclick="openLogoutModal()">
       <i class="ti ti-logout"></i> Se déconnecter
     </button>
+    <button class="btn btn-danger-outline" style="margin-top:8px;" onclick="openDeleteModal()">
+      <i class="ti ti-trash"></i> Supprimer mon compte
+    </button>
+  </div>
+</div>
+<div class="modal-overlay" id="delete-overlay" onclick="closeDeleteModalOutside(event)">
+  <div class="modal">
+    <div class="modal-title">Supprimer mon compte ?</div>
+    <div class="modal-text">Cette action est irréversible. Votre nom et votre adresse email seront supprimés définitivement. Vos réunions et dictaphones resteront disponibles, mais sans propriétaire.</div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeDeleteModal()">Annuler</button>
+      <form method="post" action="{{ url_for('auth.delete_account') }}" style="display:inline;">
+        <button type="submit" class="btn btn-danger-outline" style="width:auto;margin-top:0;">Supprimer mon compte</button>
+      </form>
+    </div>
   </div>
 </div>
 {% endblock %}
@@ -57,5 +72,8 @@
   function openLogoutModal() { document.getElementById('logout-overlay').classList.add('open'); }
   function closeLogoutModal() { document.getElementById('logout-overlay').classList.remove('open'); }
   function closeLogoutModalOutside(e) { if (e.target.id === 'logout-overlay') closeLogoutModal(); }
+  function openDeleteModal() { document.getElementById('delete-overlay').classList.add('open'); }
+  function closeDeleteModal() { document.getElementById('delete-overlay').classList.remove('open'); }
+  function closeDeleteModalOutside(e) { if (e.target.id === 'delete-overlay') closeDeleteModal(); }
 </script>
 {% endblock %}

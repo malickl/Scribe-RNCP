@@ -1,6 +1,6 @@
 """
 Lot 4 : Données & restitution
-Tableau de bord, filtres, suppression de compte.
+Tableau de bord et filtres.
 """
 
 from collections import Counter
@@ -47,10 +47,7 @@ def _stats(meetings, recordings):
 
 
 def _has_taken_place(date, resume):
-    """
-    Une réunion visio programmée dans le futur n'a pas encore eu lieu :
-    on ne l'affiche nulle part au dashboard tant que ce n'est pas le cas.
-    """
+    """Une réunion visio programmée dans le futur n'a pas encore eu lieu : on ne l'affiche nulle part tant que ce n'est pas le cas."""
     return bool(resume) or not date or date <= datetime.now()
 
 
@@ -98,30 +95,20 @@ def _filter_items(
     date_debut_filter=None,
     date_fin_filter=None
 ):
-    """
-    Filtre la liste des réunions et dictaphones selon :
-    - le type : visio ou dicta
-    - la catégorie
-    - la période : 7j ou 30j
-    """
-
     filtered_items = items
 
-    # Filtre par type
     if type_filter in ("visio", "dicta"):
         filtered_items = [
             item for item in filtered_items
             if item["type"] == type_filter
         ]
 
-    # Filtre par catégorie
     if categorie_filter:
         filtered_items = [
             item for item in filtered_items
             if item["categorie"] == categorie_filter
         ]
 
-    # Filtre par période
     if periode_filter in ("7j", "30j"):
 
         jours = 7 if periode_filter == "7j" else 30
@@ -163,17 +150,14 @@ def dashboard():
     recordings = get_user_recordings(session['user_id'])
     user = get_user(session['user_id'])
 
-    # Fusion des réunions visio et dictaphones
     items = _merged_items(meetings, recordings)
 
-    # Récupération des filtres présents dans l'URL
     type_filter = request.args.get("type")
     categorie_filter = request.args.get("categorie")
     periode_filter = request.args.get("periode")
     date_debut_filter = request.args.get("date_debut")
     date_fin_filter = request.args.get("date_fin")
 
-    # Application des filtres
     filtered_items = _filter_items(
         items,
         type_filter,
@@ -183,7 +167,7 @@ def dashboard():
         date_fin_filter
     )
 
-    # Les statistiques restent calculées sur toutes les données
+    # Calculées sur meetings/recordings non filtrés : les métriques ne doivent pas bouger selon le filtre actif.
     stats = _stats(meetings, recordings)
 
     return render_template(

@@ -1,7 +1,3 @@
-"""
-Fonction liée à Groq : analyse de la transcription par le LLM.
-"""
-
 import json
 
 def analyze(text, client, prompt):

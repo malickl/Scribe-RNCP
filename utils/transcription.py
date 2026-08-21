@@ -1,6 +1,3 @@
-"""
-Fonctions liées à AssemblyAI : transcription et diarisation.
-"""
 import assemblyai as aai
 
 

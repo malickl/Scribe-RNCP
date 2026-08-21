@@ -169,8 +169,7 @@ def envoyer_bot():
     participants = [e for e in request.form.get('participants', '').split(',') if e]
 
     if _event_key(title, date) in get_all_reunion_keys():
-        # Un bot a déjà été envoyé pour cette réunion (par n'importe qui)
-        # entre le chargement de la page et ce clic : on ne double pas.
+        # Bot déjà envoyé par quelqu'un d'autre entre le chargement de la page et ce clic.
         return redirect(url_for('captation.reunions'))
 
     try:

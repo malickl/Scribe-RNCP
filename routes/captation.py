@@ -20,6 +20,7 @@ from utils.recall import get_audio
 from utils.database import get_reunion_by_bot_id
 from utils.database import insert_reunion
 from utils.recall import send_bot
+from utils.notifications import notify_recording
 
 JOURS_FR = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 MOIS_FR = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]
@@ -178,5 +179,9 @@ def envoyer_bot():
         return redirect(url_for('captation.reunions'))
 
     insert_reunion(session['user_id'], title, date, bot_id, participant_emails=participants)
+
+    organisateur = get_user(session['user_id'])
+    autres_participants = [e for e in participants if e != organisateur['email']]
+    notify_recording(autres_participants, title, date, organisateur['nom'] or organisateur['email'])
 
     return redirect(url_for('captation.reunions'))

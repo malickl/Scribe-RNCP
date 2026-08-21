@@ -1,7 +1,3 @@
-"""
-Emails de notification (pas le contenu du compte-rendu, juste des avis).
-"""
-
 import logging
 import resend
 from datetime import datetime
@@ -19,11 +15,7 @@ def _format_date(date_iso):
 
 
 def notify_recording(participant_emails, titre, date_iso, organisateur_nom):
-    """Prévient chaque participant, dès l'affectation du bot, que Scribe va
-    rejoindre et enregistrer la réunion. Envoyée un email par destinataire
-    (pas un envoi groupé) pour ne pas exposer la liste des participants les
-    uns aux autres. Une erreur d'envoi est loguée et n'empêche jamais
-    l'affectation du bot."""
+    """Un email par destinataire (pas d'envoi groupé) pour ne pas exposer la liste des participants entre eux."""
     if not participant_emails:
         return
 

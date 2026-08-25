@@ -16,6 +16,7 @@ def transcribe(filename, transcriber):
         })
     return segments
 
+
 def format_transcription(segments):
     texte = ""
     for segment in segments:

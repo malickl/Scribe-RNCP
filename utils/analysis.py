@@ -1,5 +1,6 @@
 import json
 
+
 def analyze(text, client, prompt):
     completion = client.chat.completions.create(
         model="openai/gpt-oss-120b",

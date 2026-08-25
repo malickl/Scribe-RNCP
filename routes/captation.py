@@ -52,6 +52,7 @@ def _event_key(titre, date_iso):
 
 captation_bp = Blueprint("captation", __name__)
 
+
 @captation_bp.route("/reunions")
 def reunions():
     if 'user_id' not in session:
@@ -102,6 +103,7 @@ def reunions():
         active_nav='reunions'
     )
 
+
 @captation_bp.route("/dictaphone", methods=["POST"])
 def dictaphone():
     if 'user_id' not in session:
@@ -124,14 +126,12 @@ def dictaphone():
     return jsonify({"message": "Traitement en cours", "id": id_dictaphone}), 200
 
 
-
 @captation_bp.route("/dictaphone", methods=["GET"])
 def dictaphone_page():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
 
     return render_template("dictaphone.html", user=get_user(session['user_id']), active_nav='dictaphone')
-
 
 
 @captation_bp.route("/webhook/recall", methods=["POST"])
@@ -156,6 +156,7 @@ def webhook_recall():
     ).start()
 
     return '', 200
+
 
 @captation_bp.route("/envoyer_bot", methods=["POST"])
 def envoyer_bot():

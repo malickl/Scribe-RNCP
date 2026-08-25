@@ -1,4 +1,3 @@
-import psycopg2
 from psycopg2.pool import ThreadedConnectionPool
 import os
 from dotenv import load_dotenv

@@ -1,7 +1,8 @@
 import logging
-import resend
+import smtplib
+from email.message import EmailMessage
 from datetime import datetime
-from config import RESEND_FROM
+from config import GMAIL_ADDRESS, GMAIL_APP_PASSWORD
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,19 @@ def _format_date(date_iso):
         return date_iso
 
 
+def _send_email(to, subject, html):
+    message = EmailMessage()
+    message["From"] = f"Scribe <{GMAIL_ADDRESS}>"
+    message["To"] = to
+    message["Subject"] = subject
+    message.set_content("Ce message nécessite un client email compatible HTML.")
+    message.add_alternative(html, subtype="html")
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+        smtp.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
+        smtp.send_message(message)
+
+
 def notify_recording(participant_emails, titre, date_iso, organisateur_nom):
     """Un email par destinataire (pas d'envoi groupé) pour ne pas exposer la liste des participants entre eux."""
     if not participant_emails:
@@ -23,11 +37,10 @@ def notify_recording(participant_emails, titre, date_iso, organisateur_nom):
 
     for email in participant_emails:
         try:
-            resend.Emails.send({
-                "from": RESEND_FROM,
-                "to": [email],
-                "subject": f"Scribe va enregistrer la réunion « {titre} »",
-                "html": f"""
+            _send_email(
+                email,
+                f"Scribe va enregistrer la réunion « {titre} »",
+                f"""
                     <p>Bonjour,</p>
                     <p>{organisateur_nom} a programmé <strong>Scribe</strong>
                     pour rejoindre et enregistrer la réunion
@@ -39,6 +52,6 @@ def notify_recording(participant_emails, titre, date_iso, organisateur_nom):
                     de la réunion.</p>
                     <p>— Scribe</p>
                 """
-            })
+            )
         except Exception:
             logger.exception("Échec de l'envoi de la notification d'enregistrement à %s", email)

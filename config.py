@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 from groq import Groq
 import assemblyai as aai
-import resend
 import os
 
 load_dotenv()
@@ -10,11 +9,10 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 ASSEMBLYAI_API_KEY = os.getenv("ASSEMBLYAI_API_KEY")
 RECALL_API_KEY = os.getenv("RECALL_API_KEY")
 DATABASE_PUBLIC_URL = os.getenv("DATABASE_PUBLIC_URL")
-RESEND_API_KEY = os.getenv("RESEND_API_KEY")
-RESEND_FROM = os.getenv("RESEND_FROM", "Scribe <onboarding@resend.dev>")
+GMAIL_ADDRESS = os.getenv("GMAIL_ADDRESS")
+GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
 
 client_groq = Groq(api_key=GROQ_API_KEY)
-resend.api_key = RESEND_API_KEY
 
 aai.settings.api_key = ASSEMBLYAI_API_KEY
 aai.settings.base_url = "https://api.eu.assemblyai.com"

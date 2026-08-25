@@ -8,3 +8,4 @@ google-api-python-client
 requests
 gunicorn
 pytest
+flake8

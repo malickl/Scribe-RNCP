@@ -3,6 +3,7 @@ import os
 
 RECALL_API_KEY = os.getenv("RECALL_API_KEY")
 
+
 def send_bot(lien_reunion):
     url = "https://eu-central-1.recall.ai/api/v1/bot/"
     headers = {
@@ -44,6 +45,7 @@ def get_audio(bot_id):
         f.write(audio_response.content)
 
     return filename
+
 
 def delete_recording(recording_id):
     url = f"https://eu-central-1.recall.ai/api/v1/recording/{recording_id}/"

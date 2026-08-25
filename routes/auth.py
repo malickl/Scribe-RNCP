@@ -46,7 +46,6 @@ def login():
     return redirect(auth_url)
 
 
-
 @auth_bp.route("/callback")
 def callback():
     state = request.args.get('state')
@@ -70,7 +69,6 @@ def callback():
     }
 
     return redirect(url_for('dashboard.dashboard'))
-
 
 
 @auth_bp.route("/profil")

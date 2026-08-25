@@ -47,7 +47,7 @@ def _stats(meetings, recordings):
 
 
 def _has_taken_place(date, resume):
-    """Une réunion visio programmée dans le futur n'a pas encore eu lieu : on ne l'affiche nulle part tant que ce n'est pas le cas."""
+    """Une réunion visio future n'a pas encore eu lieu : on ne l'affiche nulle part tant que ce n'est pas le cas."""
     return bool(resume) or not date or date <= datetime.now()
 
 

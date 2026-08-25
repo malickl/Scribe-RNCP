@@ -1,3 +1,152 @@
-Conditions d'utilisation - Scribe
+SCRIBE — POLITIQUE DE CONFIDENTIALITÉ ET DE PROTECTION DES DONNÉES
+Dernière mise à jour : 25/08/2026
 
-(à compléter : politique de confidentialité + DPA)
+
+1. QUI EST RESPONSABLE DE VOS DONNÉES
+
+Scribe est un projet développé dans le cadre d'une certification RNCP.
+Le responsable de traitement est l'équipe éditrice de Scribe.
+Contact pour toute question relative à vos données : mahassadiadou@gmail.com
+
+
+2. À QUOI SERT CE DOCUMENT
+
+Ce document décrit quelles données personnelles Scribe collecte, pourquoi,
+combien de temps elles sont conservées, avec qui elles sont partagées, et
+comment exercer vos droits. Il vaut à la fois politique de confidentialité
+(pour les utilisateurs) et registre simplifié des traitements (pour la
+documentation du projet).
+
+
+3. DONNÉES COLLECTÉES ET FINALITÉS
+
+  Donnée                          | Finalité                          | Base légale
+  ---------------------------------------------------------------------------------------
+  Nom et email (compte Google)    | Créer et identifier votre compte  | Exécution du contrat
+  Événements Google Calendar      | Lister vos réunions à visio       | Exécution du contrat
+    (titre, horaire, participants)|                                    | (lecture seule)
+  Audio de réunion (visio ou      | Produire une transcription et     | Consentement
+    dictaphone)                   | un compte-rendu                   |
+  Transcription et compte-rendu   | Afficher le résultat sur votre    | Consentement
+    (thème, catégorie, humeur,    | dashboard                         |
+    résumé, actions)              |                                    |
+  Adresse email des autres        | Vous rattacher automatiquement à  | Intérêt légitime
+    participants Scribe d'une     | une réunion à laquelle vous       | (éviter l'envoi de
+    réunion                       | assistez, sans bot en double      | plusieurs bots)
+
+Scribe ne collecte aucune donnée de paiement et ne fait aucun profilage
+publicitaire.
+
+
+4. CONSENTEMENT ET ENREGISTREMENT AUDIO
+
+L'audio d'une réunion ou d'un dictaphone n'est traité qu'après acceptation
+explicite de cette politique par l'utilisateur qui crée son compte (écran de
+consentement bloquant avant tout accès au tableau de bord).
+
+Pour les visios : le bot Scribe rejoint la réunion sous un nom explicite
+("Bot Scribe"), visible par tous les participants. Il revient à
+l'utilisateur qui programme le bot d'informer les autres participants avant
+le début de la réunion, comme rappelé au moment de l'affectation du bot.
+
+Retirer son consentement se fait en supprimant son compte (voir section 7),
+Scribe n'ayant pas de mécanisme technique de retrait partiel du
+consentement sans suppression du compte à ce jour.
+
+
+5. DURÉE DE CONSERVATION
+
+  - Fichier audio brut : jamais conservé durablement. Il est supprimé du
+    serveur immédiatement après la fin du traitement (transcription +
+    analyse), que ce traitement réussisse ou échoue.
+  - Compte-rendu (thème, catégorie, humeur, résumé, actions) : conservé
+    tant qu'au moins un utilisateur (l'organisateur ou un participant
+    rattaché) a un compte actif donnant accès à cette réunion.
+  - Nom et email : conservés jusqu'à la suppression du compte, effective
+    immédiatement.
+  - Point de vigilance documenté : si un compte-rendu n'est plus rattaché à
+    aucun utilisateur actif (tous les comptes concernés ont été supprimés),
+    il peut rester en base sans être visible ni exploitable par personne.
+    Aucune purge automatique de ces réunions orphelines n'est en place à ce
+    jour ; c'est une amélioration identifiée mais non encore développée.
+
+
+6. SOUS-TRAITANTS ET TRANSFERTS DE DONNÉES
+
+Scribe fait appel aux prestataires suivants pour fonctionner. Chacun ne
+reçoit que les données strictement nécessaires à son rôle.
+
+  Google (OAuth + Calendar API)
+    Rôle : authentification, lecture des événements de calendrier.
+    Données transmises : email, nom, événements de calendrier.
+    Localisation : infrastructure Google (transferts internationaux
+    encadrés par les clauses contractuelles types de Google).
+
+  Recall.ai (captation des visios)
+    Rôle : rejoindre la visioconférence et produire l'enregistrement audio.
+    Données transmises : lien de réunion, audio de la réunion.
+    Localisation : serveurs européens (région eu-central-1).
+
+  AssemblyAI (transcription)
+    Rôle : transcrire l'audio en texte, avec attribution des tours de
+    parole (diarisation).
+    Données transmises : fichier audio.
+    Localisation : serveurs européens (endpoint api.eu.assemblyai.com).
+
+  Groq (analyse par IA)
+    Rôle : générer le thème, la catégorie, l'humeur, le résumé et les
+    actions à partir de la transcription texte.
+    Données transmises : texte de la transcription (jamais l'audio brut).
+    Localisation : société basée aux États-Unis — transfert hors Union
+    Européenne possible pour cette étape.
+
+  Railway (hébergement de l'application et de la base de données)
+    Rôle : héberger le serveur Scribe et stocker les données en base
+    PostgreSQL.
+    Localisation : région US (San Francisco) au moment de la rédaction —
+    l'ensemble des données stockées transite donc par les États-Unis,
+    indépendamment de la localisation des autres sous-traitants.
+
+Aucune donnée n'est vendue ni partagée à des fins publicitaires.
+
+
+7. VOS DROITS
+
+Conformément au RGPD, vous disposez des droits suivants sur vos données :
+
+  - Droit d'accès : consultable directement depuis votre page de profil
+    (/profil).
+  - Droit de rectification : votre nom et votre email proviennent de votre
+    compte Google et se mettent à jour automatiquement à chaque connexion.
+  - Droit à l'effacement : bouton "Supprimer mon compte" sur votre page de
+    profil. Votre nom et votre email sont supprimés immédiatement et
+    définitivement. Les réunions et dictaphones que vous possédiez restent
+    disponibles pour les autres participants qui y étaient rattachés
+    (compte-rendu sans propriétaire identifié), mais ne comportent plus
+    aucune donnée permettant de vous identifier.
+  - Droit d'opposition : vous pouvez cesser d'utiliser Scribe et supprimer
+    votre compte à tout moment, sans justification.
+
+Pour toute question ou demande ne pouvant pas être traitée directement
+depuis l'application, contactez mahassadiadou@gmail.com.
+
+
+8. SÉCURITÉ
+
+  - Les connexions au site se font en HTTPS.
+  - L'authentification passe par Google OAuth : Scribe ne stocke jamais de
+    mot de passe.
+  - L'accès à une réunion ou un dictaphone en base est systématiquement
+    vérifié par rapport à l'utilisateur connecté avant toute lecture ou
+    modification.
+
+
+9. MINEURS
+
+Scribe n'est pas destiné aux personnes de moins de 15 ans.
+
+
+10. MODIFICATIONS DE CE DOCUMENT
+
+Cette politique peut évoluer avec le projet. La date de dernière mise à
+jour est indiquée en haut de ce document.

@@ -269,43 +269,45 @@ Probabilité et impact évalués sur trois niveaux : Faible, Moyen, Fort.
 **Contexte système**
 
 ```mermaid
-C4Context
-    Person(julien, "Julien / Nadia", "Utilisateur Scribe")
-    System(scribe, "Scribe", "Capture, transcrit et analyse des réunions")
-    System_Ext(google, "Google", "OAuth + Calendar API")
-    System_Ext(recall, "Recall.ai", "Bot de captation visio (région EU)")
-    System_Ext(assemblyai, "AssemblyAI", "Transcription + diarisation (endpoint EU)")
-    System_Ext(groq, "Groq", "Analyse LLM (résumé, thème, actions)")
-    System_Ext(railway, "Railway", "Hébergement app + PostgreSQL")
+flowchart LR
+    U(["Julien / Nadia<br/>Utilisateur Scribe"])
+    S["Scribe<br/>Capture, transcrit et<br/>analyse des réunions"]
+    G["Google<br/>OAuth + Calendar API"]
+    R["Recall.ai<br/>Bot de captation visio<br/>(région EU)"]
+    A["AssemblyAI<br/>Transcription + diarisation<br/>(endpoint EU)"]
+    Gr["Groq<br/>Analyse LLM<br/>(résumé, thème, actions)"]
+    Rw["Railway<br/>Hébergement app<br/>+ PostgreSQL"]
 
-    Rel(julien, scribe, "Utilise", "HTTPS")
-    Rel(scribe, google, "Authentifie l'utilisateur, lit son agenda")
-    Rel(scribe, recall, "Envoie un bot, récupère l'audio")
-    Rel(scribe, assemblyai, "Envoie l'audio, reçoit la transcription")
-    Rel(scribe, groq, "Envoie la transcription, reçoit l'analyse")
-    Rel(scribe, railway, "Stocke ses données")
+    U -->|HTTPS| S
+    S -->|"Authentifie, lit l'agenda"| G
+    S -->|"Envoie un bot,<br/>récupère l'audio"| R
+    S -->|"Envoie l'audio,<br/>reçoit la transcription"| A
+    S -->|"Envoie la transcription,<br/>reçoit l'analyse"| Gr
+    S -->|Stocke ses données| Rw
 ```
 
 **Conteneurs**
 
 ```mermaid
-C4Container
-    Person(user, "Utilisateur")
-    Container_Boundary(scribe, "Scribe") {
-        Container(web, "Application Flask", "Python / Jinja2", "Routes : auth, captation, dashboard, pipeline")
-        ContainerDb(db, "PostgreSQL", "Railway", "users, reunions, dictaphones, reunion_participants")
-    }
-    System_Ext(google, "Google OAuth + Calendar")
-    System_Ext(recall, "Recall.ai")
-    System_Ext(assemblyai, "AssemblyAI")
-    System_Ext(groq, "Groq")
+flowchart TD
+    U(["Utilisateur"])
 
-    Rel(user, web, "HTTPS")
-    Rel(web, db, "psycopg2, pool de connexions")
-    Rel(web, google, "OAuth, lecture calendrier")
-    Rel(web, recall, "Envoi/réception bot")
-    Rel(web, assemblyai, "Transcription")
-    Rel(web, groq, "Analyse")
+    subgraph Scribe
+        Web["Application Flask<br/>Python / Jinja2<br/>routes: auth, captation,<br/>dashboard, pipeline"]
+        DB[("PostgreSQL — Railway<br/>users, reunions,<br/>dictaphones,<br/>reunion_participants")]
+    end
+
+    G["Google<br/>OAuth + Calendar"]
+    R["Recall.ai"]
+    A["AssemblyAI"]
+    Gr["Groq"]
+
+    U -->|HTTPS| Web
+    Web -->|"psycopg2,<br/>pool de connexions"| DB
+    Web -->|"OAuth,<br/>lecture calendrier"| G
+    Web -->|"Envoi / réception bot"| R
+    Web -->|Transcription| A
+    Web -->|Analyse| Gr
 ```
 
 L'application est un monolithe Flask server-rendered (pas d'API séparée

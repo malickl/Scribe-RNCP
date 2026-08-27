@@ -12,12 +12,19 @@ from utils.database import (
     get_user_meetings,
     get_user_recordings,
     get_user,
-    rename_item
+    rename_item,
+    toggle_action
 )
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
 TABLES_RENOMMABLES = {"reunions", "dictaphones"}
+
+# Au-delà de ce délai depuis la date de la réunion/de l'enregistrement sans
+# résumé produit, on considère le traitement en échec plutôt qu'en cours :
+# couvre le bot qui n'a jamais rejoint la réunion (annulée, jamais lancée,
+# refusé à l'entrée...) et un pipeline qui a échoué sans jamais se terminer.
+DELAI_ECHEC_TRAITEMENT = timedelta(hours=3)
 
 
 def _stats(meetings, recordings):
@@ -51,6 +58,10 @@ def _has_taken_place(date, resume):
     return bool(resume) or not date or date <= datetime.now()
 
 
+def _a_echoue(date, resume):
+    return bool(date) and not resume and datetime.now() - date > DELAI_ECHEC_TRAITEMENT
+
+
 def _merged_items(meetings, recordings):
     items = []
 
@@ -70,6 +81,7 @@ def _merged_items(meetings, recordings):
                 "humeur": humeur,
                 "resume": resume,
                 "actions": actions,
+                "echec": _a_echoue(date, resume),
             })
 
     items.sort(key=lambda item: item["date"], reverse=True)
@@ -182,6 +194,21 @@ def dashboard():
         date_debut_filter=date_debut_filter,
         date_fin_filter=date_fin_filter
     )
+
+
+@dashboard_bp.route("/basculer_action", methods=["POST"])
+def basculer_action():
+    if 'user_id' not in session:
+        return '', 401
+
+    table = request.form.get('table')
+    row_id = request.form.get('id')
+    index = request.form.get('index', '')
+
+    if table in TABLES_RENOMMABLES and row_id and index.isdigit():
+        toggle_action(session['user_id'], table, row_id, int(index))
+
+    return '', 204
 
 
 @dashboard_bp.route("/renommer", methods=["POST"])

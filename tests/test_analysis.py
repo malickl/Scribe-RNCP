@@ -12,7 +12,7 @@ def test_analyze():
     report = analyze("texte de la transcription", client, "prompt système")
 
     assert report["theme"] == "Suivi projet"
-    assert report["actions"] == ["Faire X"]
+    assert report["actions"] == [{"texte": "Faire X", "fait": False}]
 
     _, kwargs = client.chat.completions.create.call_args
     assert kwargs["response_format"] == {"type": "json_object"}

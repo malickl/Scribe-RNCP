@@ -72,6 +72,16 @@ def delete_user(id_user):
         cur.execute("DELETE FROM users WHERE id_user = %s", (id_user,))
 
 
+def _normalize_actions(actions):
+    """Les réunions/dictaphones analysés avant l'ajout de la case à cocher
+    ont des actions stockées comme de simples chaînes ; on les remet à niveau
+    à la lecture plutôt que de migrer les données existantes."""
+    return [
+        action if isinstance(action, dict) else {"texte": action, "fait": False}
+        for action in actions
+    ]
+
+
 def get_user_meetings(id_user):
     with get_cursor() as cur:
         cur.execute("""
@@ -86,7 +96,7 @@ def get_user_meetings(id_user):
     result = []
     for row in rows:
         row = list(row)
-        row[7] = json.loads(row[7]) if row[7] else []
+        row[7] = _normalize_actions(json.loads(row[7])) if row[7] else []
         result.append(row)
     return result
 
@@ -104,7 +114,7 @@ def get_user_recordings(id_user):
     result = []
     for row in rows:
         row = list(row)
-        row[7] = json.loads(row[7]) if row[7] else []
+        row[7] = _normalize_actions(json.loads(row[7])) if row[7] else []
         result.append(row)
     return result
 
@@ -128,6 +138,42 @@ def rename_item(id_user, table, row_id, titre):
             SET titre = %s
             WHERE {column_id} = %s AND id_user = %s
         """, (titre, row_id, id_user))
+
+
+def toggle_action(id_user, table, row_id, index):
+    """Coche/décoche l'action à `index` pour la réunion/le dictaphone donné.
+    Accès vérifié explicitement (propriétaire, ou participant pour une
+    réunion partagée) plutôt que de faire confiance à l'identifiant seul."""
+    column_id = "id_reunion" if table == "reunions" else "id_dictaphone"
+
+    with get_cursor(commit=True) as cur:
+        if table == "reunions":
+            cur.execute("""
+                SELECT actions FROM reunions r
+                LEFT JOIN reunion_participants rp ON rp.id_reunion = r.id_reunion
+                WHERE r.id_reunion = %s AND (r.id_user = %s OR rp.id_user = %s)
+            """, (row_id, id_user, id_user))
+        else:
+            cur.execute(f"""
+                SELECT actions FROM {table}
+                WHERE {column_id} = %s AND id_user = %s
+            """, (row_id, id_user))
+
+        row = cur.fetchone()
+        if not row or not row[0]:
+            return
+
+        actions = _normalize_actions(json.loads(row[0]))
+        if not 0 <= index < len(actions):
+            return
+
+        actions[index]["fait"] = not actions[index]["fait"]
+
+        cur.execute(f"""
+            UPDATE {table}
+            SET actions = %s
+            WHERE {column_id} = %s
+        """, (json.dumps(actions), row_id))
 
 
 def update_analysis(table, row_id, report):

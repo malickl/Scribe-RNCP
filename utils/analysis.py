@@ -10,4 +10,6 @@ def analyze(text, client, prompt):
         ],
         response_format={"type": "json_object"}
     )
-    return json.loads(completion.choices[0].message.content)
+    report = json.loads(completion.choices[0].message.content)
+    report["actions"] = [{"texte": texte, "fait": False} for texte in report.get("actions", [])]
+    return report

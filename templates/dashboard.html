@@ -274,6 +274,11 @@
       </div>
     </div>
 
+    <input type="hidden" name="echecs" id="echecs-filter" value="{{ '1' if afficher_echecs else '' }}">
+    <button type="button" class="filter-pill {% if afficher_echecs %}active{% endif %}" onclick="setEchecsFilter({{ 'false' if afficher_echecs else 'true' }})">
+      <i class="ti ti-alert-triangle"></i> Afficher les échecs
+    </button>
+
 </form>
 
   {% if items %}
@@ -363,6 +368,11 @@
 
   function setTypeFilter(type) {
     document.getElementById('type-filter').value = type;
+    submitFilters();
+  }
+
+  function setEchecsFilter(afficher) {
+    document.getElementById('echecs-filter').value = afficher ? '1' : '';
     submitFilters();
   }
 

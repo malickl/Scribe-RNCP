@@ -105,9 +105,13 @@ def _filter_items(
     categorie_filter=None,
     periode_filter=None,
     date_debut_filter=None,
-    date_fin_filter=None
+    date_fin_filter=None,
+    afficher_echecs=False
 ):
     filtered_items = items
+
+    if not afficher_echecs:
+        filtered_items = [item for item in filtered_items if not item["echec"]]
 
     if type_filter in ("visio", "dicta"):
         filtered_items = [
@@ -169,6 +173,7 @@ def dashboard():
     periode_filter = request.args.get("periode")
     date_debut_filter = request.args.get("date_debut")
     date_fin_filter = request.args.get("date_fin")
+    afficher_echecs = request.args.get("echecs") == "1"
 
     filtered_items = _filter_items(
         items,
@@ -176,7 +181,8 @@ def dashboard():
         categorie_filter,
         periode_filter,
         date_debut_filter,
-        date_fin_filter
+        date_fin_filter,
+        afficher_echecs
     )
 
     # Calculées sur meetings/recordings non filtrés : les métriques ne doivent pas bouger selon le filtre actif.
@@ -192,7 +198,8 @@ def dashboard():
         categorie_filter=categorie_filter,
         periode_filter=periode_filter,
         date_debut_filter=date_debut_filter,
-        date_fin_filter=date_fin_filter
+        date_fin_filter=date_fin_filter,
+        afficher_echecs=afficher_echecs
     )
 
 

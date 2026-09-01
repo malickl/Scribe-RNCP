@@ -60,7 +60,7 @@ def test_latency_recall_api():
     headers = {"Authorization": f"Token {RECALL_API_KEY}"}
 
     debut = time.perf_counter()
-    response = requests.get("https://eu-central-1.recall.ai/api/v1/bot/", headers=headers)
+    response = requests.get("https://eu-central-1.recall.ai/api/v1/bot/", headers=headers, timeout=15)
     duree = time.perf_counter() - debut
 
     print(f"\n[latence] Recall.ai (GET /bot/) : {duree:.2f} s")

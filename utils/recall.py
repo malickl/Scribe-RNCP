@@ -16,7 +16,7 @@ def send_bot(lien_reunion):
         "recording_config": {"audio_mixed_mp3": {}}
     }
 
-    response = requests.post(url, json=payload, headers=headers)
+    response = requests.post(url, json=payload, headers=headers, timeout=15)
     if not response.ok:
         raise RuntimeError(f"Recall a refusé l'envoi du bot ({response.status_code}) : {response.text}")
 
@@ -30,7 +30,7 @@ def get_audio(bot_id):
     url = f"https://eu-central-1.recall.ai/api/v1/bot/{bot_id}/"
     headers = {"Authorization": f"Token {RECALL_API_KEY}"}
 
-    r = requests.get(url, headers=headers)
+    r = requests.get(url, headers=headers, timeout=15)
     if not r.ok:
         raise RuntimeError(f"Recall a refusé la lecture du bot {bot_id} ({r.status_code}) : {r.text}")
     bot_data = r.json()
@@ -41,7 +41,7 @@ def get_audio(bot_id):
 
     recording_id = recordings[0]["id"]
     audio_url = recordings[0]["media_shortcuts"]["audio_mixed"]["data"]["download_url"]
-    audio_response = requests.get(audio_url)
+    audio_response = requests.get(audio_url, timeout=60)
     audio_response.raise_for_status()
 
     filename = f"reunion_{bot_id}.mp3"
@@ -55,7 +55,7 @@ def delete_recording(recording_id):
     url = f"https://eu-central-1.recall.ai/api/v1/recording/{recording_id}/"
     headers = {"Authorization": f"Token {RECALL_API_KEY}"}
 
-    response = requests.delete(url, headers=headers)
+    response = requests.delete(url, headers=headers, timeout=15)
     if not response.ok:
         raise RuntimeError(
             f"Recall a refusé la suppression de l'enregistrement {recording_id} "

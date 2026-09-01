@@ -26,4 +26,4 @@ jobs:
         run: flake8 .
 
       - name: Tests unitaires (pytest, sans appel API réel)
-        run: pytest tests/ -v
+        run: pytest tests/ -v --cov=utils --cov=routes --cov-report=term-missing

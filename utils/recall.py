@@ -24,6 +24,9 @@ def send_bot(lien_reunion):
 
 
 def get_audio(bot_id):
+    """Télécharge l'audio et renvoie aussi le recording_id, pour permettre
+    à l'appelant d'effacer l'enregistrement chez Recall.ai une fois le
+    fichier récupéré (voir delete_recording)."""
     url = f"https://eu-central-1.recall.ai/api/v1/bot/{bot_id}/"
     headers = {"Authorization": f"Token {RECALL_API_KEY}"}
 
@@ -36,6 +39,7 @@ def get_audio(bot_id):
     if not recordings:
         raise RuntimeError(f"Aucun enregistrement disponible pour le bot {bot_id}")
 
+    recording_id = recordings[0]["id"]
     audio_url = recordings[0]["media_shortcuts"]["audio_mixed"]["data"]["download_url"]
     audio_response = requests.get(audio_url)
     audio_response.raise_for_status()
@@ -44,11 +48,16 @@ def get_audio(bot_id):
     with open(filename, "wb") as f:
         f.write(audio_response.content)
 
-    return filename
+    return filename, recording_id
 
 
 def delete_recording(recording_id):
     url = f"https://eu-central-1.recall.ai/api/v1/recording/{recording_id}/"
     headers = {"Authorization": f"Token {RECALL_API_KEY}"}
 
-    requests.delete(url, headers=headers)
+    response = requests.delete(url, headers=headers)
+    if not response.ok:
+        raise RuntimeError(
+            f"Recall a refusé la suppression de l'enregistrement {recording_id} "
+            f"({response.status_code}) : {response.text}"
+        )

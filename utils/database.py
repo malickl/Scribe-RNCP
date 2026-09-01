@@ -7,13 +7,24 @@ import json
 load_dotenv()
 
 # ThreadedConnectionPool car run_pipeline() touche la DB depuis des threads
-# de fond en parallèle des requêtes Flask.
-_pool = ThreadedConnectionPool(1, 10, dsn=os.getenv("DATABASE_PUBLIC_URL"))
+# de fond en parallèle des requêtes Flask. Créé à la première utilisation
+# (pas à l'import) : importer ce module ne doit pas exiger une base
+# accessible (tests, CI), et une indisponibilité momentanée de la base au
+# démarrage du process ne doit pas empêcher l'application de démarrer.
+_pool = None
+
+
+def _get_pool():
+    global _pool
+    if _pool is None:
+        _pool = ThreadedConnectionPool(1, 10, dsn=os.getenv("DATABASE_PUBLIC_URL"))
+    return _pool
 
 
 @contextmanager
 def get_cursor(commit=False):
-    conn = _pool.getconn()
+    pool = _get_pool()
+    conn = pool.getconn()
     try:
         cur = conn.cursor()
         yield cur
@@ -24,7 +35,7 @@ def get_cursor(commit=False):
         raise
     finally:
         cur.close()
-        _pool.putconn(conn)
+        pool.putconn(conn)
 
 
 def get_or_create_user(email, nom):

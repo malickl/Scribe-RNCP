@@ -22,6 +22,11 @@ diarisation incluse (~0,17 $/h, presque 3x moins cher que Deepgram), et
 endpoint européen disponible (`api.eu.assemblyai.com`) — effectivement
 utilisé par Scribe.
 
+**Configuration retenue : détection automatique de la langue.** AssemblyAI
+supporte la diarisation combinée à la détection automatique de la langue
+(`language_detection=True`) — Scribe l'utilise plutôt qu'une langue fixée
+en dur, pour ne pas limiter l'app au français.
+
 ## Famille 2 : LLM pour le résumé et l'extraction d'actions
 
 | Critère | Llama 3.3 70B Versatile | Qwen3 32B | openai/gpt-oss-120b |
@@ -75,7 +80,10 @@ dispenserait pas d'appeler un LLM pour le résumé.
 compatibilité universelle (Zoom/Teams/Meet/Webex/Slack) contre une
 couverture encore restreinte chez Vexa.ai, et déjà conforme RGPD sans
 nécessiter d'auto-hébergement (que le projet n'a pas les moyens
-d'opérer/maintenir à ce stade).
+d'opérer/maintenir à ce stade). Scribe utilise en plus l'endpoint de
+suppression de l'API Recall pour effacer l'enregistrement juste après
+l'avoir téléchargé, plutôt que de le laisser expirer selon la politique de
+rétention par défaut du prestataire.
 
 ## Sources
 

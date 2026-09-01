@@ -4,7 +4,7 @@ import assemblyai as aai
 def transcribe(filename, transcriber):
     config = aai.TranscriptionConfig(
         speaker_labels=True,
-        language_code="fr"
+        language_detection=True
     )
     transcript = transcriber.transcribe(filename, config)
 

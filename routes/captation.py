@@ -20,6 +20,10 @@ from utils.recall import get_audio
 from utils.database import get_reunion_by_bot_id
 from utils.database import insert_reunion
 from utils.recall import send_bot
+from utils.recall import delete_recording
+import logging
+
+logger = logging.getLogger(__name__)
 
 JOURS_FR = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 MOIS_FR = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]
@@ -147,7 +151,14 @@ def webhook_recall():
     if id_reunion is None:
         return '', 200
 
-    filename = get_audio(bot_id)
+    filename, recording_id = get_audio(bot_id)
+
+    try:
+        delete_recording(recording_id)
+    except Exception:
+        # Ne bloque jamais le traitement : au pire l'enregistrement reste
+        # chez Recall.ai un peu plus longtemps, ce qui est loggé pour suivi.
+        logger.exception("Échec de la suppression de l'enregistrement %s chez Recall.ai", recording_id)
 
     threading.Thread(
         target=run_pipeline,

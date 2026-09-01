@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Politique de confidentialité — Scribe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F1115;
+    --surface: #171A20;
+    --surface-2: #1D2028;
+    --border: #262B34;
+    --text-primary: #E8EAED;
+    --text-secondary: #8B92A0;
+    --text-muted: #5A6070;
+    --accent: #5EEAD4;
+    --accent-dim: rgba(94, 234, 212, 0.12);
+    --warn: #F5A97F;
+    --warn-dim: rgba(245, 169, 127, 0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 48px 24px 96px;
+  }
+
+  .page {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13px;
+    margin-bottom: 32px;
+  }
+  .back:hover { color: var(--accent); }
+
+  header.doc-header { margin-bottom: 8px; }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 34px;
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+  }
+
+  .updated {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 36px;
+  }
+
+  nav.toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 48px;
+  }
+  nav.toc .toc-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+  nav.toc ol {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 24px;
+  }
+  nav.toc a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 13.5px;
+    line-height: 1.8;
+  }
+  nav.toc a:hover { color: var(--accent); }
+
+  section.doc-section {
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    scroll-margin-top: 24px;
+  }
+  section.doc-section:first-of-type { border-top: none; padding-top: 0; }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 19px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  h2 .num {
+    color: var(--accent);
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  p {
+    color: var(--text-secondary);
+    font-size: 14.5px;
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+  p:last-child { margin-bottom: 0; }
+
+  a.mail {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  a.mail:hover { text-decoration: underline; }
+
+  ul.doc-list {
+    list-style: none;
+    margin-top: 4px;
+  }
+  ul.doc-list li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    color: var(--text-secondary);
+    font-size: 14.5px;
+    line-height: 1.65;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+  }
+  ul.doc-list li:first-child { border-top: none; padding-top: 0; }
+  ul.doc-list li .dot {
+    color: var(--accent);
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 10px;
+  }
+  ul.doc-list strong { color: var(--text-primary); font-weight: 500; }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 16px;
+    font-size: 13.5px;
+  }
+  .data-table th {
+    text-align: left;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0 12px 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    color: var(--text-secondary);
+    padding: 12px 12px 12px 0;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table td.legal-basis {
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .subprocessors {
+    display: grid;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .subprocessor {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .subprocessor .name {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 14.5px;
+    margin-bottom: 8px;
+  }
+  .subprocessor dl {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 6px 12px;
+  }
+  .subprocessor dt {
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+  .subprocessor dd {
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .subprocessor.warn { border-color: rgba(245,169,127,0.3); }
+  .subprocessor.warn dd.flag { color: var(--warn); }
+
+  @media (max-width: 560px) {
+    nav.toc ol { grid-template-columns: 1fr; }
+    .subprocessor dl { grid-template-columns: 1fr; }
+    .subprocessor dt { margin-top: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <a class="back" href="/">← Retour à Scribe</a>
+
+  <header class="doc-header">
+    <h1>Politique de confidentialité</h1>
+    <div class="updated">Dernière mise à jour : 25 août 2026</div>
+  </header>
+
+  <nav class="toc">
+    <div class="toc-label">Sommaire</div>
+    <ol>
+      <li><a href="#1">1. Qui est responsable de vos données</a></li>
+      <li><a href="#2">2. À quoi sert ce document</a></li>
+      <li><a href="#3">3. Données collectées et finalités</a></li>
+      <li><a href="#4">4. Consentement et enregistrement audio</a></li>
+      <li><a href="#5">5. Durée de conservation</a></li>
+      <li><a href="#6">6. Sous-traitants et transferts de données</a></li>
+      <li><a href="#7">7. Vos droits</a></li>
+      <li><a href="#8">8. Sécurité</a></li>
+      <li><a href="#9">9. Mineurs</a></li>
+      <li><a href="#10">10. Modifications de ce document</a></li>
+    </ol>
+  </nav>
+
+  <section class="doc-section" id="1">
+    <h2><span class="num">1.</span> Qui est responsable de vos données</h2>
+    <p>Scribe est un projet développé dans le cadre d'une certification RNCP. Le responsable de traitement est l'équipe éditrice de Scribe.</p>
+    <p>Contact pour toute question relative à vos données : <a class="mail" href="mailto:mahassadiadou@gmail.com">mahassadiadou@gmail.com</a></p>
+  </section>
+
+  <section class="doc-section" id="2">
+    <h2><span class="num">2.</span> À quoi sert ce document</h2>
+    <p>Ce document décrit quelles données personnelles Scribe collecte, pourquoi, combien de temps elles sont conservées, avec qui elles sont partagées, et comment exercer vos droits. Il vaut à la fois politique de confidentialité (pour les utilisateurs) et registre simplifié des traitements (pour la documentation du projet).</p>
+  </section>
+
+  <section class="doc-section" id="3">
+    <h2><span class="num">3.</span> Données collectées et finalités</h2>
+    <table class="data-table">
+      <tr><th>Donnée</th><th>Finalité</th><th>Base légale</th></tr>
+      <tr><td>Nom et email (compte Google)</td><td>Créer et identifier votre compte</td><td class="legal-basis">Exécution du contrat</td></tr>
+      <tr><td>Événements Google Calendar (titre, horaire, participants)</td><td>Lister vos réunions à visio</td><td class="legal-basis">Exécution du contrat (lecture seule)</td></tr>
+      <tr><td>Audio de réunion (visio ou dictaphone)</td><td>Produire une transcription et un compte-rendu</td><td class="legal-basis">Consentement</td></tr>
+      <tr><td>Transcription et compte-rendu (thème, catégorie, humeur, résumé, actions)</td><td>Afficher le résultat sur votre dashboard</td><td class="legal-basis">Consentement</td></tr>
+      <tr><td>Adresse email des autres participants Scribe d'une réunion</td><td>Vous rattacher automatiquement à une réunion à laquelle vous assistez, sans bot en double</td><td class="legal-basis">Intérêt légitime</td></tr>
+    </table>
+    <p>Scribe ne collecte aucune donnée de paiement et ne fait aucun profilage publicitaire.</p>
+  </section>
+
+  <section class="doc-section" id="4">
+    <h2><span class="num">4.</span> Consentement et enregistrement audio</h2>
+    <p>L'audio d'une réunion ou d'un dictaphone n'est traité qu'après acceptation explicite de cette politique par l'utilisateur qui crée son compte (écran de consentement bloquant avant tout accès au tableau de bord).</p>
+    <p>Pour les visios : le bot Scribe rejoint la réunion sous un nom explicite ("Bot Scribe"), visible par tous les participants. Il revient à l'utilisateur qui programme le bot d'informer les autres participants avant le début de la réunion, comme rappelé au moment de l'affectation du bot.</p>
+    <p>Retirer son consentement se fait en supprimant son compte (voir section 7), Scribe n'ayant pas de mécanisme technique de retrait partiel du consentement sans suppression du compte à ce jour.</p>
+  </section>
+
+  <section class="doc-section" id="5">
+    <h2><span class="num">5.</span> Durée de conservation</h2>
+    <ul class="doc-list">
+      <li><span class="dot">●</span><span><strong>Fichier audio brut :</strong> jamais conservé durablement. Il est supprimé du serveur immédiatement après la fin du traitement (transcription + analyse), que ce traitement réussisse ou échoue. Pour les visios, l'enregistrement est aussi supprimé chez Recall.ai (via son API) juste après le téléchargement de l'audio, pour ne pas y laisser de copie.</span></li>
+      <li><span class="dot">●</span><span><strong>Compte-rendu</strong> (thème, catégorie, humeur, résumé, actions) : conservé tant qu'au moins un utilisateur (l'organisateur ou un participant rattaché) a un compte actif donnant accès à cette réunion.</span></li>
+      <li><span class="dot">●</span><span><strong>Nom et email :</strong> conservés jusqu'à la suppression du compte, effective immédiatement.</span></li>
+      <li><span class="dot">●</span><span><strong>Point de vigilance documenté :</strong> si un compte-rendu n'est plus rattaché à aucun utilisateur actif (tous les comptes concernés ont été supprimés), il peut rester en base sans être visible ni exploitable par personne. Aucune purge automatique de ces réunions orphelines n'est en place à ce jour ; c'est une amélioration identifiée mais non encore développée.</span></li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="6">
+    <h2><span class="num">6.</span> Sous-traitants et transferts de données</h2>
+    <p>Scribe fait appel aux prestataires suivants pour fonctionner. Chacun ne reçoit que les données strictement nécessaires à son rôle.</p>
+    <div class="subprocessors">
+      <div class="subprocessor">
+        <div class="name">Google — OAuth + Calendar API</div>
+        <dl>
+          <dt>Rôle</dt><dd>Authentification, lecture des événements de calendrier.</dd>
+          <dt>Données transmises</dt><dd>Email, nom, événements de calendrier.</dd>
+          <dt>Localisation</dt><dd>Infrastructure Google (transferts internationaux encadrés par les clauses contractuelles types de Google).</dd>
+        </dl>
+      </div>
+      <div class="subprocessor">
+        <div class="name">Recall.ai — Captation des visios</div>
+        <dl>
+          <dt>Rôle</dt><dd>Rejoindre la visioconférence et produire l'enregistrement audio.</dd>
+          <dt>Données transmises</dt><dd>Lien de réunion, audio de la réunion.</dd>
+          <dt>Localisation</dt><dd>Serveurs européens (région eu-central-1).</dd>
+        </dl>
+      </div>
+      <div class="subprocessor">
+        <div class="name">AssemblyAI — Transcription</div>
+        <dl>
+          <dt>Rôle</dt><dd>Transcrire l'audio en texte, avec attribution des tours de parole (diarisation).</dd>
+          <dt>Données transmises</dt><dd>Fichier audio.</dd>
+          <dt>Localisation</dt><dd>Serveurs européens (endpoint api.eu.assemblyai.com).</dd>
+        </dl>
+      </div>
+      <div class="subprocessor warn">
+        <div class="name">Groq — Analyse par IA</div>
+        <dl>
+          <dt>Rôle</dt><dd>Générer le thème, la catégorie, l'humeur, le résumé et les actions à partir de la transcription texte.</dd>
+          <dt>Données transmises</dt><dd>Texte de la transcription (jamais l'audio brut).</dd>
+          <dt>Localisation</dt><dd class="flag">Société basée aux États-Unis — transfert hors Union Européenne possible pour cette étape.</dd>
+        </dl>
+      </div>
+      <div class="subprocessor warn">
+        <div class="name">Railway — Hébergement de l'application et de la base de données</div>
+        <dl>
+          <dt>Rôle</dt><dd>Héberger le serveur Scribe et stocker les données en base PostgreSQL.</dd>
+          <dt>Localisation</dt><dd class="flag">Région US (San Francisco) au moment de la rédaction — l'ensemble des données stockées transite donc par les États-Unis, indépendamment de la localisation des autres sous-traitants.</dd>
+        </dl>
+      </div>
+    </div>
+    <p style="margin-top:16px;">Aucune donnée n'est vendue ni partagée à des fins publicitaires.</p>
+  </section>
+
+  <section class="doc-section" id="7">
+    <h2><span class="num">7.</span> Vos droits</h2>
+    <p>Conformément au RGPD, vous disposez des droits suivants sur vos données :</p>
+    <ul class="doc-list">
+      <li><span class="dot">●</span><span><strong>Droit d'accès :</strong> consultable directement depuis votre page de profil (/profil).</span></li>
+      <li><span class="dot">●</span><span><strong>Droit de rectification :</strong> votre nom et votre email proviennent de votre compte Google et se mettent à jour automatiquement à chaque connexion.</span></li>
+      <li><span class="dot">●</span><span><strong>Droit à l'effacement :</strong> bouton "Supprimer mon compte" sur votre page de profil. Votre nom et votre email sont supprimés immédiatement et définitivement. Les réunions et dictaphones que vous possédiez restent disponibles pour les autres participants qui y étaient rattachés (compte-rendu sans propriétaire identifié), mais ne comportent plus aucune donnée permettant de vous identifier.</span></li>
+      <li><span class="dot">●</span><span><strong>Droit d'opposition :</strong> vous pouvez cesser d'utiliser Scribe et supprimer votre compte à tout moment, sans justification.</span></li>
+    </ul>
+    <p style="margin-top:16px;">Pour toute question ou demande ne pouvant pas être traitée directement depuis l'application, contactez <a class="mail" href="mailto:mahassadiadou@gmail.com">mahassadiadou@gmail.com</a>.</p>
+  </section>
+
+  <section class="doc-section" id="8">
+    <h2><span class="num">8.</span> Sécurité</h2>
+    <ul class="doc-list">
+      <li><span class="dot">●</span><span>Les connexions au site se font en HTTPS.</span></li>
+      <li><span class="dot">●</span><span>L'authentification passe par Google OAuth : Scribe ne stocke jamais de mot de passe.</span></li>
+      <li><span class="dot">●</span><span>L'accès à une réunion ou un dictaphone en base est systématiquement vérifié par rapport à l'utilisateur connecté avant toute lecture ou modification.</span></li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="9">
+    <h2><span class="num">9.</span> Mineurs</h2>
+    <p>Scribe n'est pas destiné aux personnes de moins de 15 ans.</p>
+  </section>
+
+  <section class="doc-section" id="10">
+    <h2><span class="num">10.</span> Modifications de ce document</h2>
+    <p>Cette politique peut évoluer avec le projet. La date de dernière mise à jour est indiquée en haut de ce document.</p>
+  </section>
+</div>
+
+</body>
+</html>

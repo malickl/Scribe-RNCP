@@ -8,4 +8,5 @@ google-api-python-client
 requests
 gunicorn
 pytest
+pytest-cov
 flake8

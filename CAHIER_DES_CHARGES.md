@@ -104,7 +104,9 @@ approche de classification, bot réunion). Choix retenus :
 
 - **Transcription : AssemblyAI** (Universal-2). Le moins cher des trois
   candidats une fois la diarisation incluse (~0,17 $/h), endpoint européen
-  disponible et utilisé (`api.eu.assemblyai.com`).
+  disponible et utilisé (`api.eu.assemblyai.com`), avec détection
+  automatique de la langue combinée à la diarisation — l'application
+  n'est pas limitée au français.
 - **LLM : Groq — openai/gpt-oss-120b.** Moins cher à l'entrée que les
   alternatives comparées (0,15 $/M tokens), vitesse d'inférence élevée,
   sortie JSON structurée fiable.
@@ -148,7 +150,10 @@ rappelée explicitement dans l'interface au moment de la captation.
 - **Rétention.** Les fichiers audio bruts ne sont jamais conservés
   au-delà du traitement : ils sont supprimés du serveur immédiatement
   après la fin du pipeline (transcription + analyse), que celui-ci
-  réussisse ou échoue.
+  réussisse ou échoue. Ils sont également supprimés côté Recall.ai
+  (suppression explicite de l'enregistrement via son API, juste après le
+  téléchargement de l'audio) — le prestataire ne conserve pas de copie
+  au-delà du temps strictement nécessaire à la remise du fichier.
 - **Effacement.** La suppression d'un compte retire définitivement les
   données personnelles de l'utilisateur (nom, email). Une réunion visio
   pouvant être partagée entre plusieurs utilisateurs Scribe (l'organisateur

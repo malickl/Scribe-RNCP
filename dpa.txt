@@ -58,7 +58,9 @@ consentement sans suppression du compte à ce jour.
 
   - Fichier audio brut : jamais conservé durablement. Il est supprimé du
     serveur immédiatement après la fin du traitement (transcription +
-    analyse), que ce traitement réussisse ou échoue.
+    analyse), que ce traitement réussisse ou échoue. Pour les visios,
+    l'enregistrement est aussi supprimé chez Recall.ai (via son API) juste
+    après le téléchargement de l'audio, pour ne pas y laisser de copie.
   - Compte-rendu (thème, catégorie, humeur, résumé, actions) : conservé
     tant qu'au moins un utilisateur (l'organisateur ou un participant
     rattaché) a un compte actif donnant accès à cette réunion.

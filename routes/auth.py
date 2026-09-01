@@ -87,9 +87,7 @@ def logout():
 
 @auth_bp.route("/conditions")
 def conditions():
-    with open("dpa.txt", "r", encoding="utf-8") as f:
-        contenu = f.read()
-    return f"<pre>{contenu}</pre>"
+    return render_template("conditions.html")
 
 
 @auth_bp.route("/supprimer_compte", methods=["POST"])

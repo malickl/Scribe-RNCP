@@ -168,8 +168,9 @@ Scribe fait appel à Recall.ai (captation à distance), AssemblyAI
 (transcription) et Groq (analyse), ainsi qu'à Google (authentification et
 lecture de calendrier) et Railway (hébergement et base de données). Au
 sens du RGPD, Scribe est responsable de traitement et ces services sont
-sous-traitants. Chacun est documenté dans `dpa.txt` : rôle, données
-transmises, et localisation — y compris la précision que l'hébergement
+sous-traitants. Chacun est documenté sur la page `/conditions`
+(`templates/conditions.html`) : rôle, données transmises, et
+localisation — y compris la précision que l'hébergement
 Railway du projet est en région US, ce qui implique un transfert
 international pour l'ensemble des données stockées, indépendamment de la
 localisation européenne choisie pour Recall.ai et AssemblyAI.

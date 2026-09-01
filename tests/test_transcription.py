@@ -23,3 +23,14 @@ def test_transcribe():
     segments = transcribe("fichier.mp3", transcriber)
 
     assert segments == [{"speaker": "A", "text": "Bonjour"}]
+
+
+def test_transcribe_aucune_parole_detectee():
+    """Sur un audio sans parole détectée, AssemblyAI renvoie
+    utterances=None plutôt qu'une liste vide — ne doit pas planter."""
+    transcriber = MagicMock()
+    transcriber.transcribe.return_value.utterances = None
+
+    segments = transcribe("silence.wav", transcriber)
+
+    assert segments == []

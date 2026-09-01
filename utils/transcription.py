@@ -9,7 +9,7 @@ def transcribe(filename, transcriber):
     transcript = transcriber.transcribe(filename, config)
 
     segments = []
-    for utterance in transcript.utterances:
+    for utterance in transcript.utterances or []:
         segments.append({
             "speaker": utterance.speaker,
             "text": utterance.text

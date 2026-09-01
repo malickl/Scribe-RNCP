@@ -262,6 +262,37 @@ Probabilité et impact évalués sur trois niveaux : Faible, Moyen, Fort.
   déclenche un redéploiement sur Railway, où la base de données est déjà
   hébergée.
 
+### 6.1.9) Perspectives d'évolution — au-delà de la V1
+
+Scribe V1 couvre volontairement un périmètre précis : connexion à **Google
+Calendar** uniquement, via une intégration OAuth développée en propre
+(`routes/auth.py`). Un utilisateur dont l'agenda professionnel est sur
+Outlook/Teams n'a aujourd'hui aucun moyen de voir ses réunions dans
+Scribe — pas par manque de support technique du bot (Recall.ai peut déjà
+rejoindre un lien Teams, Zoom ou Meet indifféremment), mais parce que la
+lecture du calendrier elle-même se limite à Google, et plus précisément au
+champ `hangoutLink` propre à Google Meet.
+
+**Piste retenue pour une V2 : la Calendar Integration API de Recall.ai.**
+Ce service gère la connexion OAuth au calendrier de l'utilisateur à la
+place de Scribe, et supporte nativement Google Calendar **et**
+Outlook/Microsoft — ce qui ouvrirait Scribe aux utilisateurs Teams sans
+développer d'intégration Microsoft Graph dédiée. Il gère aussi nativement
+la déduplication des bots pour un même événement, fonctionnalité que
+Scribe a dû construire à la main (`reunion_participants`,
+`get_all_reunion_keys`).
+
+Ce n'est pas un simple changement de configuration : le comportement par
+défaut de cette API est d'envoyer les bots **automatiquement** aux
+réunions détectées, ce qui entre en tension avec le choix de conception
+retenu en V1 (consentement explicite par réunion, jamais d'envoi
+automatique — voir 6.1.5). Une V2 sur cette base impliquerait de
+retravailler cette décision autant que le code : soit accepter l'envoi
+automatique avec un mécanisme de consentement en amont (au moment de la
+connexion du calendrier plutôt que réunion par réunion), soit configurer
+l'API en mode manuel pour conserver le contrôle actuel. C'est un chantier
+identifié, pas engagé sur cette version.
+
 ## 6.2) Spécifications & architecture
 
 ### 6.2.1) Diagrammes C4
